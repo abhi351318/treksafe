@@ -2,6 +2,7 @@
  * Google Maps API Loader & Helper Service
  * Uses user-configured Google Maps API Key
  */
+import { COMPREHENSIVE_TREKS } from './trekPresets';
 
 export const DEFAULT_GOOGLE_MAPS_KEY = "AIzaSyC0s9MazIsPaeY8HOZa8HoVd2FF9kLthQ4";
 
@@ -76,108 +77,36 @@ export function loadGoogleMaps(apiKey?: string): Promise<typeof google> {
   return googleMapsPromise;
 }
 
-// Popular trek presets with verified coordinates and elevations
-export const POPULAR_TREKS = [
-  {
-    id: 'kudremukh',
-    name: 'Kudremukh Peak',
-    region: 'Chikkamagaluru, Karnataka',
-    country: 'India',
-    latitude: 13.136,
-    longitude: 75.273,
-    elevation: 1894,
-    trailDifficulty: 'Moderate' as const,
-    description: 'Iconic horse-faced peak in the Western Ghats known for rolling grasslands and sudden mist/rainstorms.'
-  },
-  {
-    id: 'triund',
-    name: 'Triund Hill Trek',
-    region: 'Dharamshala, Himachal Pradesh',
-    country: 'India',
-    latitude: 32.2592,
-    longitude: 76.3533,
-    elevation: 2842,
-    trailDifficulty: 'Moderate' as const,
-    description: 'Tranquil ridge trail overlooking the Kangra Valley and majestic Dhauladhar ranges.'
-  },
-  {
-    id: 'kedarkantha',
-    name: 'Kedarkantha Summit',
-    region: 'Uttarkashi, Uttarakhand',
-    country: 'India',
-    latitude: 31.0242,
-    longitude: 78.1725,
-    elevation: 3810,
-    trailDifficulty: 'Challenging' as const,
-    description: 'Classic Himalayan winter summit known for dense pine forests, sub-zero winds, and high snow.'
-  },
-  {
-    id: 'roopkund',
-    name: 'Roopkund Trail',
-    region: 'Chamoli, Uttarakhand',
-    country: 'India',
-    latitude: 30.2644,
-    longitude: 79.7314,
-    elevation: 5029,
-    trailDifficulty: 'Strenuous' as const,
-    description: 'High-altitude glacial lake trek prone to severe blizzards, zero visibility, and rapid atmospheric pressure drops.'
-  },
-  {
-    id: 'rainier',
-    name: 'Mount Rainier Skyline Trail',
-    region: 'Washington',
-    country: 'United States',
-    latitude: 46.8523,
-    longitude: -121.7603,
-    elevation: 2140,
-    trailDifficulty: 'Challenging' as const,
-    description: 'Subalpine loop through wildflower meadows up towards the active volcanic glaciated peak.'
-  },
-  {
-    id: 'half_dome',
-    name: 'Half Dome Trail',
-    region: 'Yosemite, California',
-    country: 'United States',
-    latitude: 37.7460,
-    longitude: -119.5332,
-    elevation: 2694,
-    trailDifficulty: 'Strenuous' as const,
-    description: 'Exposed granite dome with famous steel cables, strictly hazardous during wet rain or lightning.'
-  },
-  {
-    id: 'fuji',
-    name: 'Mount Fuji Yoshida Trail',
-    region: 'Yamanashi',
-    country: 'Japan',
-    latitude: 35.3606,
-    longitude: 138.7274,
-    elevation: 3776,
-    trailDifficulty: 'Strenuous' as const,
-    description: 'Volcanic gravel ascent subject to extreme summit gales, freezing rain, and rapid hypothermia risks.'
-  },
-  {
-    id: 'ben_nevis',
-    name: 'Ben Nevis Mountain Track',
-    region: 'Highlands',
-    country: 'United Kingdom',
-    latitude: 56.7969,
-    longitude: -5.0036,
-    elevation: 1345,
-    trailDifficulty: 'Moderate' as const,
-    description: 'Highest peak in the British Isles notorious for gale-force winds, sudden cloud immersion, and driving rain.'
-  },
-  {
-    id: 'mont_blanc',
-    name: 'Tour du Mont Blanc (Chamonix)',
-    region: 'Haute-Savoie / Valais',
-    country: 'France / Italy / Switzerland',
-    latitude: 45.8326,
-    longitude: 6.8652,
-    elevation: 2537,
-    trailDifficulty: 'Strenuous' as const,
-    description: 'Legendary circumnavigation through high alpine passes with volatile mountain thunderstorms.'
-  }
-];
+export const POPULAR_TREKS = COMPREHENSIVE_TREKS;
+
+// Well-known Indian & global city coordinates to ensure instant resolution even if offline
+export const KNOWN_CITIES: Record<string, { lat: number; lng: number; name: string; region: string }> = {
+  bengaluru: { lat: 12.9716, lng: 77.5946, name: 'Bengaluru', region: 'Karnataka, India' },
+  bangalore: { lat: 12.9716, lng: 77.5946, name: 'Bengaluru', region: 'Karnataka, India' },
+  kolar: { lat: 13.1378, lng: 78.1294, name: 'Kolar', region: 'Karnataka, India' },
+  chikkaballapur: { lat: 13.4355, lng: 77.7275, name: 'Chikkaballapur', region: 'Karnataka, India' },
+  mysore: { lat: 12.2958, lng: 76.6394, name: 'Mysuru', region: 'Karnataka, India' },
+  mysuru: { lat: 12.2958, lng: 76.6394, name: 'Mysuru', region: 'Karnataka, India' },
+  tumakuru: { lat: 13.3409, lng: 77.1010, name: 'Tumakuru', region: 'Karnataka, India' },
+  tumkur: { lat: 13.3409, lng: 77.1010, name: 'Tumakuru', region: 'Karnataka, India' },
+  chikkamagaluru: { lat: 13.3153, lng: 75.7754, name: 'Chikkamagaluru', region: 'Karnataka, India' },
+  chikmagalur: { lat: 13.3153, lng: 75.7754, name: 'Chikkamagaluru', region: 'Karnataka, India' },
+  coorg: { lat: 12.4244, lng: 75.7382, name: 'Madikeri (Coorg)', region: 'Karnataka, India' },
+  madikeri: { lat: 12.4244, lng: 75.7382, name: 'Madikeri (Coorg)', region: 'Karnataka, India' },
+  dharamshala: { lat: 32.2190, lng: 76.3234, name: 'Dharamshala', region: 'Himachal Pradesh, India' },
+  manali: { lat: 32.2432, lng: 77.1892, name: 'Manali', region: 'Himachal Pradesh, India' },
+  shimla: { lat: 31.1048, lng: 77.1734, name: 'Shimla', region: 'Himachal Pradesh, India' },
+  dehradun: { lat: 30.3165, lng: 78.0322, name: 'Dehradun', region: 'Uttarakhand, India' },
+  rishikesh: { lat: 30.0869, lng: 78.2676, name: 'Rishikesh', region: 'Uttarakhand, India' },
+  mumbai: { lat: 19.0760, lng: 72.8777, name: 'Mumbai', region: 'Maharashtra, India' },
+  pune: { lat: 18.5204, lng: 73.8567, name: 'Pune', region: 'Maharashtra, India' },
+  delhi: { lat: 28.6139, lng: 77.2090, name: 'New Delhi', region: 'Delhi, India' },
+  seattle: { lat: 47.6062, lng: -122.3321, name: 'Seattle', region: 'Washington, USA' },
+  zurich: { lat: 47.3769, lng: 8.5417, name: 'Zurich', region: 'Switzerland' },
+  geneva: { lat: 46.2044, lng: 6.1432, name: 'Geneva', region: 'Switzerland' },
+  tokyo: { lat: 35.6762, lng: 139.6503, name: 'Tokyo', region: 'Japan' },
+  edinburgh: { lat: 55.9533, lng: -3.1883, name: 'Edinburgh', region: 'Scotland, UK' }
+};
 
 export async function searchPlaces(query: string): Promise<Array<{
   placeId: string;
@@ -190,7 +119,38 @@ export async function searchPlaces(query: string): Promise<Array<{
 
   const cleanQuery = query.trim().toLowerCase();
 
-  // Try Google Maps Autocomplete/Geocoding if loaded
+  // 1. Direct match with Known Cities (Instant, 100% reliable)
+  for (const [key, city] of Object.entries(KNOWN_CITIES)) {
+    if (cleanQuery.includes(key) || key.includes(cleanQuery)) {
+      return [{
+        placeId: `known_city_${key}`,
+        name: city.name,
+        formattedAddress: `${city.name}, ${city.region}`,
+        latitude: city.lat,
+        longitude: city.lng
+      }];
+    }
+  }
+
+  // 2. Direct match with Curated Treks
+  const matchedPresets = COMPREHENSIVE_TREKS.filter(
+    (t) =>
+      t.name.toLowerCase().includes(cleanQuery) ||
+      (t.region && t.region.toLowerCase().includes(cleanQuery)) ||
+      (t.country && t.country.toLowerCase().includes(cleanQuery))
+  ).map((t) => ({
+    placeId: `preset_${t.id}`,
+    name: t.name,
+    formattedAddress: `${t.region || ''}, ${t.country || ''}`,
+    latitude: t.latitude,
+    longitude: t.longitude
+  }));
+
+  if (matchedPresets.length > 0) {
+    return matchedPresets;
+  }
+
+  // 3. Try Google Maps Geocoder if loaded
   try {
     const googleMaps = await loadGoogleMaps();
     if (googleMaps && googleMaps.maps && googleMaps.maps.Geocoder) {
@@ -216,28 +176,10 @@ export async function searchPlaces(query: string): Promise<Array<{
       }
     }
   } catch (err) {
-    console.log('Google Geocoder fallback to preset/geocoding service:', err);
+    console.log('Google Geocoder fallback:', err);
   }
 
-  // Preset matches
-  const matchedPresets = POPULAR_TREKS.filter(
-    (t) =>
-      t.name.toLowerCase().includes(cleanQuery) ||
-      t.region.toLowerCase().includes(cleanQuery) ||
-      t.country.toLowerCase().includes(cleanQuery)
-  ).map((t) => ({
-    placeId: `preset_${t.id}`,
-    name: t.name,
-    formattedAddress: `${t.region}, ${t.country}`,
-    latitude: t.latitude,
-    longitude: t.longitude
-  }));
-
-  if (matchedPresets.length > 0) {
-    return matchedPresets;
-  }
-
-  // Global Nominatim / OpenStreetMap fallback geocoder for any custom trail/mountain in the world
+  // 4. Global OpenStreetMap / Nominatim fallback
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(

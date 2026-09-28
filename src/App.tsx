@@ -21,6 +21,7 @@ import { ApiSettingsModal } from './components/ApiSettingsModal';
 import { AuthModal } from './components/AuthModal';
 import { NearbyTreksModal } from './components/NearbyTreksModal';
 import { TrekChecklist } from './components/TrekChecklist';
+import { CityTrekExplorer } from './components/CityTrekExplorer';
 import { useAuth } from './context/AuthContext';
 import { enrichTrekWithTrailway } from './services/trailPathwayService';
 import { db } from './services/firebase';
@@ -398,6 +399,15 @@ export default function App() {
 
           </div>
         </section>
+
+        {/* Dedicated City & Popular Trek Explorer Panel */}
+        <CityTrekExplorer
+          selectedTrek={selectedTrek}
+          onSelectTrek={(trek) => {
+            handleSelectTrek(trek);
+          }}
+          disabled={isLoading}
+        />
 
         {/* Loading Progress State */}
         {isLoading && (

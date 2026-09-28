@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { TrekLocation } from '../types';
 import { POPULAR_TREKS, searchPlaces } from '../services/googleMapsLoader';
 import { enrichTrekWithTrailway } from '../services/trailPathwayService';
-import { Search, MapPin, X, Compass, Loader2 } from 'lucide-react';
+import { getTreksForCity } from '../services/cityTrekService';
+import { Search, MapPin, X, Compass, Loader2, Navigation } from 'lucide-react';
 
 interface LocationSearchProps {
   selectedTrek: TrekLocation;
@@ -22,9 +23,12 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     formattedAddress: string;
     latitude: number;
     longitude: number;
+    isTrekPreset?: boolean;
+    trekObj?: TrekLocation;
   }>>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isCitySearchMode, setIsCitySearchMode] = useState(false);
   const searchBoxRef = useRef<HTMLDivElement>(null);
 
   // Sync when selectedTrek updates externally
@@ -43,16 +47,37 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Debounced search query
+  // Debounced search query - searches both direct places/peaks and city locations
   useEffect(() => {
     if (!isOpen || query.trim().length < 2) {
       setSuggestions([]);
+      setIsCitySearchMode(false);
       return;
     }
 
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
+        // 1. First, check if input matches or is near a city
+        const cityResult = await getTreksForCity(query);
+        if (cityResult.foundInCity && cityResult.treks.length > 0) {
+          setIsCitySearchMode(true);
+          setSuggestions(
+            cityResult.treks.map((t) => ({
+              placeId: `city_trek_${t.id}`,
+              name: t.name,
+              formattedAddress: t.region ? `${t.region} (near ${cityResult.cityName})` : `Near ${cityResult.cityName}`,
+              latitude: t.latitude,
+              longitude: t.longitude,
+              isTrekPreset: true,
+              trekObj: t
+            }))
+          );
+          return;
+        }
+
+        // 2. Otherwise search standard places / peaks
+        setIsCitySearchMode(false);
         const results = await searchPlaces(query);
         setSuggestions(results);
       } catch (err) {
@@ -60,7 +85,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
       } finally {
         setIsSearching(false);
       }
-    }, 280);
+    }, 250);
 
     return () => clearTimeout(timer);
   }, [query, isOpen]);
@@ -71,26 +96,33 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     formattedAddress: string;
     latitude: number;
     longitude: number;
+    trekObj?: TrekLocation;
   }) => {
+    if (s.trekObj) {
+      setQuery(s.trekObj.name);
+      setIsOpen(false);
+      onSelectTrek(s.trekObj);
+      return;
+    }
+
     // Check if matches a known preset for rich elevation metadata
     const preset = POPULAR_TREKS.find(
       p => p.name.toLowerCase() === s.name.toLowerCase() ||
-           Math.abs(p.latitude - s.latitude) < 0.05 && Math.abs(p.longitude - s.longitude) < 0.05
+           (Math.abs(p.latitude - s.latitude) < 0.05 && Math.abs(p.longitude - s.longitude) < 0.05)
     );
 
-    const baseTrek: TrekLocation = {
+    const baseTrek: TrekLocation = preset || {
       id: s.placeId,
       name: s.name,
       region: s.formattedAddress,
       latitude: s.latitude,
       longitude: s.longitude,
-      elevation: preset ? preset.elevation : 1450,
-      trailDifficulty: preset ? preset.trailDifficulty : 'Moderate',
-      description: preset ? preset.description : `Trek destination located at ${s.formattedAddress}`
+      elevation: 1450,
+      trailDifficulty: 'Moderate',
+      description: `Trek destination located at ${s.formattedAddress}`
     };
 
     const newTrek = enrichTrekWithTrailway(baseTrek);
-
     setQuery(newTrek.name);
     setIsOpen(false);
     onSelectTrek(newTrek);
@@ -107,9 +139,9 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     <div className="w-full space-y-2.5" ref={searchBoxRef}>
       <label className="block text-xs font-bold uppercase tracking-wider text-[#243B2A] flex items-center justify-between">
         <span className="flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-[#526B4F]" /> Trek Location or Trailhead
+          <MapPin className="w-3.5 h-3.5 text-[#526B4F]" /> Trek Location, Peak or City
         </span>
-        <span className="text-[11px] font-normal lowercase text-[#526B4F]">Google Places & presets</span>
+        <span className="text-[11px] font-normal lowercase text-[#526B4F]">Enter city or trail name</span>
       </label>
 
       {/* Input container */}
@@ -131,7 +163,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="Search trail, peak, mountain pass (e.g., Kudremukh, Rainier)..."
+          placeholder="Type city or trail (e.g., Bengaluru, Kolar, Nandi Hills, Skandagiri)..."
           className="w-full pl-10 pr-9 py-2.5 bg-white border border-[#D5D0C0] hover:border-[#243B2A]/50 focus:border-[#243B2A] focus:ring-2 focus:ring-[#243B2A]/10 rounded-xl text-sm font-medium text-[#1F2520] placeholder-[#8C8675] outline-hidden transition-all shadow-2xs"
         />
 
@@ -143,7 +175,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
               setQuery('');
               setIsOpen(true);
             }}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#8C8675] hover:text-[#1F2520]"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#8C8675] hover:text-[#1F2520] cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -152,6 +184,13 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
         {/* Autocomplete Dropdown */}
         {isOpen && (
           <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-[#D5D0C0] rounded-xl shadow-lg z-30 max-h-72 overflow-y-auto divide-y divide-[#F0EDE3]">
+            {isCitySearchMode && suggestions.length > 0 && (
+              <div className="px-3.5 py-1.5 bg-[#243B2A]/10 text-[#243B2A] text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <Navigation className="w-3.5 h-3.5 text-[#243B2A]" />
+                Trails located in or near this city:
+              </div>
+            )}
+
             {suggestions.length > 0 ? (
               suggestions.map((item) => (
                 <button
@@ -172,23 +211,26 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
                 </button>
               ))
             ) : query.trim().length >= 2 && !isSearching ? (
-              <div className="p-4 text-center text-xs text-[#6B7262]">
-                No places found matching "{query}". Try one of the popular mountain trails below.
+              <div className="p-3 text-center text-xs text-[#6B7262]">
+                No specific trails recorded for "{query}". Select from popular mountain treks below:
               </div>
             ) : null}
 
-            {/* Popular Trek Presets Section in Dropdown */}
+            {/* Always Keep Popular Mountain Trek Presets */}
             <div className="p-2.5 bg-[#FAF8F3]">
-              <div className="text-[11px] font-bold text-[#526B4F] uppercase tracking-wider px-1 pb-1.5 flex items-center gap-1">
-                <Compass className="w-3 h-3 text-[#D7A84A]" /> Suggested Mountain Trails
+              <div className="text-[11px] font-bold text-[#526B4F] uppercase tracking-wider px-1 pb-1.5 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <Compass className="w-3 h-3 text-[#D7A84A]" /> Popular Trekking Places
+                </span>
+                <span className="text-[10px] lowercase text-[#8C8675] font-normal">Click to select</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                {POPULAR_TREKS.slice(0, 6).map((preset) => (
+                {POPULAR_TREKS.slice(0, 8).map((preset) => (
                   <button
                     key={preset.id}
                     type="button"
                     onClick={() => handlePresetClick(preset)}
-                    className="text-left px-2.5 py-1.5 rounded-lg hover:bg-white text-xs text-[#243B2A] font-medium flex items-center justify-between group transition-colors"
+                    className="text-left px-2.5 py-1.5 rounded-lg hover:bg-white text-xs text-[#243B2A] font-medium flex items-center justify-between group transition-colors cursor-pointer"
                   >
                     <span className="truncate">{preset.name}</span>
                     <span className="text-[10px] text-[#6B7262] font-mono shrink-0 ml-1.5">
@@ -205,7 +247,16 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
       {/* Quick Select Preset Pills */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 scrollbar-none text-xs">
         <span className="text-[#6B7262] shrink-0 text-[11px] font-medium mr-1">Popular:</span>
-        {POPULAR_TREKS.slice(0, 5).map((preset) => {
+        {[
+          'Nandi Hills Trail',
+          'Skandagiri (Kalavara Durga)',
+          'Antargange Cave Trek',
+          'Savandurga Monolith Trek',
+          'Makalidurga Fort Trek',
+          'Kudremukh Peak',
+          'Triund Hill Trek'
+        ].map((trailName) => {
+          const preset = POPULAR_TREKS.find(p => p.name === trailName) || POPULAR_TREKS[0];
           const isSelected = selectedTrek.name === preset.name;
           return (
             <button
@@ -219,7 +270,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
                   : 'bg-white text-[#243B2A] border-[#DCD7C6] hover:border-[#243B2A] hover:bg-[#FAF8F3]'
               }`}
             >
-              {preset.name}
+              {preset.name.split(' (')[0]}
             </button>
           );
         })}
