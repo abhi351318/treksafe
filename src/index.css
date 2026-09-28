@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: #F5F3EC;
+    color: #1F2520;
+  }
+  
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Subtle Topographic pattern */
+.bg-topo {
+  background-color: #F5F3EC;
+  background-image: radial-gradient(#526B4F 0.75px, transparent 0.75px), radial-gradient(#243B2A 0.5px, #F5F3EC 0.5px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+  background-opacity: 0.05;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #ECE8DC;
+}
+::-webkit-scrollbar-thumb {
+  background: #C4BFB0;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #A09A88;
+}

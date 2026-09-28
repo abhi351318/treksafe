@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with display information and preferences",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "SavedTrek": {
+      "title": "SavedTrek",
+      "description": "Saved trek analysis belonging to a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "trekId": { "type": "string" },
+        "trekName": { "type": "string" },
+        "region": { "type": "string" },
+        "date": { "type": "string" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "elevation": { "type": "number" },
+        "riskScore": { "type": "number" },
+        "riskBand": { "type": "string" },
+        "temperature": { "type": "number" },
+        "rainProbability": { "type": "number" },
+        "savedAt": { "type": "string" }
+      },
+      "required": ["userId", "trekName", "date", "riskScore"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "entity": "UserProfile",
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "User document storing profile details"
+    },
+    "/users/{userId}/savedTreks/{trekRecordId}": {
+      "entity": "SavedTrek",
+      "schema": {
+        "$ref": "#/entities/SavedTrek"
+      },
+      "description": "Subcollection of saved treks for each user"
+    }
+  }
+}

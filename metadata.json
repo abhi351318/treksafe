@@ -1,0 +1,6 @@
+{
+  "name": "TrekSafe AI",
+  "description": "Trek Management & Weather Risk Prediction Platform. Plan the trail. Understand the weather. Trek smarter.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
