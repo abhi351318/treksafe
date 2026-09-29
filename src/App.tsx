@@ -22,6 +22,7 @@ import { AuthModal } from './components/AuthModal';
 import { NearbyTreksModal } from './components/NearbyTreksModal';
 import { TrekChecklist } from './components/TrekChecklist';
 import { CityTrekExplorer } from './components/CityTrekExplorer';
+import { ProfileModal } from './components/ProfileModal';
 import { useAuth } from './context/AuthContext';
 import { enrichTrekWithTrailway } from './services/trailPathwayService';
 import { db } from './services/firebase';
@@ -76,6 +77,7 @@ export default function App() {
   const [isApiModalOpen, setIsApiModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isNearbyModalOpen, setIsNearbyModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
 
   // Saved itineraries stored in localStorage & synced with Firestore for logged in user
@@ -309,10 +311,18 @@ export default function App() {
             {/* Auth / Account Controls */}
             {user ? (
               <div className="flex items-center gap-1.5 pl-1 border-l border-[#E4E0D2]">
-                <div className="px-2.5 py-1 bg-[#243B2A]/10 rounded-xl text-xs font-bold text-[#243B2A] flex items-center gap-1.5 max-w-[140px] truncate">
+                <button
+                  type="button"
+                  onClick={() => setIsProfileModalOpen(true)}
+                  className="px-2.5 py-1 bg-[#243B2A]/10 hover:bg-[#243B2A]/20 border border-[#D5D0C0]/60 rounded-xl text-xs font-bold text-[#243B2A] flex items-center gap-1.5 max-w-[170px] truncate transition-all cursor-pointer shadow-2xs"
+                  title="View and edit your personal trekker profile"
+                >
                   <UserIcon className="w-3.5 h-3.5 text-[#526B4F] shrink-0" />
                   <span className="truncate">{user.displayName || user.email?.split('@')[0] || 'Trekker'}</span>
-                </div>
+                  <span className="text-[10px] text-[#526B4F] uppercase tracking-wider font-semibold ml-0.5 hidden md:inline">
+                    • Profile
+                  </span>
+                </button>
                 <button
                   onClick={() => logout()}
                   className="p-1.5 bg-white hover:bg-[#FAF8F3] border border-[#D5D0C0] text-[#526B4F] hover:text-red-700 rounded-xl transition-all shadow-2xs cursor-pointer"
@@ -668,6 +678,11 @@ export default function App() {
         onSelectTrek={(trek) => {
           handleSelectTrek(trek);
         }}
+      />
+
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
       />
 
     </div>

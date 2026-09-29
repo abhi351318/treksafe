@@ -155,3 +155,38 @@ export interface DatasetRow {
   incidentType?: 'Trail Closure' | 'Hypothermia/Rescue' | 'Flash Flood' | 'Severe Gale' | 'None';
   riskScore: number;
 }
+
+export type TrekExperienceLevel = 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
+export type FitnessLevel = 'Low / Leisure' | 'Moderate' | 'High' | 'Athletic / Endurance';
+export type PreferredDifficulty = 'Easy' | 'Moderate' | 'Challenging' | 'Strenuous' | 'Expert';
+
+export interface EmergencyContact {
+  name: string;
+  relationship: string;
+  phone: string;
+}
+
+export interface TrekkerPreferences {
+  weatherAlerts: boolean;
+  riskAlerts: boolean;
+  trekReminders: boolean;
+}
+
+export interface TrekkerProfile {
+  uid: string;
+  displayName: string;
+  email: string;
+  phone: string;
+  photoURL: string;
+  city: string;
+  experienceLevel: TrekExperienceLevel;
+  preferredDifficulty: PreferredDifficulty;
+  preferredTrekTypes: string[]; // e.g. ['Day Hikes', 'Monolith & Rock', 'High Altitude', 'Cave Exploration', 'Forest Trails']
+  fitnessLevel: FitnessLevel;
+  typicalDistanceKm: number; // e.g., 5 - 25 km
+  maxElevationMeters: number; // e.g., 1000 - 6000 m
+  emergencyContact: EmergencyContact;
+  preferences: TrekkerPreferences;
+  createdAt?: string;
+  updatedAt?: string;
+}

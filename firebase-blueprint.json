@@ -2,14 +2,42 @@
   "entities": {
     "UserProfile": {
       "title": "UserProfile",
-      "description": "User profile with display information and preferences",
+      "description": "User profile with personal trekker details, gear experience, emergency contact and preferences",
       "type": "object",
       "properties": {
         "uid": { "type": "string" },
         "email": { "type": "string" },
         "displayName": { "type": "string" },
+        "phone": { "type": "string" },
         "photoURL": { "type": "string" },
-        "createdAt": { "type": "string" }
+        "city": { "type": "string" },
+        "experienceLevel": { "type": "string" },
+        "preferredDifficulty": { "type": "string" },
+        "preferredTrekTypes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "fitnessLevel": { "type": "string" },
+        "typicalDistanceKm": { "type": "number" },
+        "maxElevationMeters": { "type": "number" },
+        "emergencyContact": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "relationship": { "type": "string" },
+            "phone": { "type": "string" }
+          }
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "weatherAlerts": { "type": "boolean" },
+            "riskAlerts": { "type": "boolean" },
+            "trekReminders": { "type": "boolean" }
+          }
+        },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
       },
       "required": ["uid", "email"]
     },

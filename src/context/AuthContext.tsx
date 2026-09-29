@@ -54,25 +54,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const loginWithEmail = async (email: string, pass: string) => {
-    await signInWithEmailAndPassword(auth, email.trim(), pass);
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) throw new Error('Email is required.');
+    if (!pass) throw new Error('Password is required.');
+    await signInWithEmailAndPassword(auth, trimmedEmail, pass);
   };
 
   const registerWithEmail = async (name: string, email: string, pass: string) => {
-    const cred = await createUserWithEmailAndPassword(auth, email.trim(), pass);
+    const trimmedEmail = email.trim();
+    const trimmedName = name.trim();
+    if (!trimmedEmail) throw new Error('Email is required.');
+    if (!pass) throw new Error('Password is required.');
+    if (pass.length < 6) throw new Error('Password must be at least 6 characters.');
+
+    const cred = await createUserWithEmailAndPassword(auth, trimmedEmail, pass);
     if (cred.user) {
-      if (name.trim()) {
-        await updateProfile(cred.user, { displayName: name.trim() });
+      if (trimmedName) {
+        try {
+          await updateProfile(cred.user, { displayName: trimmedName });
+        } catch (e) {
+          console.warn('Could not update Auth displayName:', e);
+        }
       }
       try {
         await setDoc(doc(db, 'users', cred.user.uid), {
           uid: cred.user.uid,
-          email: cred.user.email || '',
-          displayName: name.trim() || 'Trekker',
+          email: cred.user.email || trimmedEmail,
+          displayName: trimmedName || 'Trekker',
           photoURL: '',
+          city: 'Bengaluru',
+          experienceLevel: 'Intermediate',
+          preferredDifficulty: 'Moderate',
+          preferredTrekTypes: ['Day Hikes', 'Monolith & Rock'],
+          fitnessLevel: 'Moderate',
+          typicalDistanceKm: 10,
+          maxElevationMeters: 1800,
+          emergencyContact: {
+            name: '',
+            relationship: 'Family',
+            phone: ''
+          },
+          preferences: {
+            weatherAlerts: true,
+            riskAlerts: true,
+            trekReminders: true
+          },
           createdAt: new Date().toISOString()
-        });
+        }, { merge: true });
       } catch (err) {
-        console.warn('Firestore user record write error:', err);
+        console.warn('Firestore initial user record write warning:', err);
       }
     }
   };
