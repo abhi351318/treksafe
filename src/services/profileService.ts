@@ -25,57 +25,83 @@ export const DEFAULT_TREKKER_PROFILE: Omit<TrekkerProfile, 'uid' | 'email' | 'di
   }
 };
 
+const getLocalProfileKey = (uid: string) => `treksafe_profile_${uid}`;
+
 /**
  * Fetch a trekker's personal profile by their Firebase UID
  */
 export async function getTrekkerProfile(uid: string): Promise<TrekkerProfile | null> {
   if (!uid) return null;
+
+  // 1. Try local storage cache first for instant responsiveness
+  let cachedData: any = null;
+  try {
+    const raw = localStorage.getItem(getLocalProfileKey(uid));
+    if (raw) cachedData = JSON.parse(raw);
+  } catch (e) {
+    console.warn('Local profile cache read error:', e);
+  }
+
+  // 2. Fetch from Firestore
   try {
     const docRef = doc(db, 'users', uid);
     const snap = await getDoc(docRef);
-    if (!snap.exists()) {
-      return null;
+    if (snap.exists()) {
+      const data = snap.data();
+      const profile: TrekkerProfile = {
+        uid,
+        displayName: data.displayName || auth.currentUser?.displayName || 'Trekker',
+        email: data.email || auth.currentUser?.email || '',
+        phone: data.phone || '',
+        photoURL: data.photoURL || auth.currentUser?.photoURL || '',
+        city: data.city || 'Bengaluru',
+        experienceLevel: data.experienceLevel || 'Intermediate',
+        preferredDifficulty: data.preferredDifficulty || 'Moderate',
+        preferredTrekTypes: data.preferredTrekTypes || ['Day Hikes', 'Monolith & Rock'],
+        fitnessLevel: data.fitnessLevel || 'Moderate',
+        typicalDistanceKm: typeof data.typicalDistanceKm === 'number' ? data.typicalDistanceKm : 10,
+        maxElevationMeters: typeof data.maxElevationMeters === 'number' ? data.maxElevationMeters : 1800,
+        emergencyContact: {
+          name: data.emergencyContact?.name || '',
+          relationship: data.emergencyContact?.relationship || 'Family',
+          phone: data.emergencyContact?.phone || ''
+        },
+        preferences: {
+          weatherAlerts: data.preferences?.weatherAlerts ?? true,
+          riskAlerts: data.preferences?.riskAlerts ?? true,
+          trekReminders: data.preferences?.trekReminders ?? true
+        },
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt
+      };
+
+      // Update local cache
+      try {
+        localStorage.setItem(getLocalProfileKey(uid), JSON.stringify(profile));
+      } catch (err) {
+        // ignore
+      }
+
+      return profile;
     }
-    const data = snap.data();
-    return {
-      uid,
-      displayName: data.displayName || auth.currentUser?.displayName || 'Trekker',
-      email: data.email || auth.currentUser?.email || '',
-      phone: data.phone || '',
-      photoURL: data.photoURL || auth.currentUser?.photoURL || '',
-      city: data.city || 'Bengaluru',
-      experienceLevel: data.experienceLevel || 'Intermediate',
-      preferredDifficulty: data.preferredDifficulty || 'Moderate',
-      preferredTrekTypes: data.preferredTrekTypes || ['Day Hikes', 'Monolith & Rock'],
-      fitnessLevel: data.fitnessLevel || 'Moderate',
-      typicalDistanceKm: typeof data.typicalDistanceKm === 'number' ? data.typicalDistanceKm : 10,
-      maxElevationMeters: typeof data.maxElevationMeters === 'number' ? data.maxElevationMeters : 1800,
-      emergencyContact: {
-        name: data.emergencyContact?.name || '',
-        relationship: data.emergencyContact?.relationship || 'Family',
-        phone: data.emergencyContact?.phone || ''
-      },
-      preferences: {
-        weatherAlerts: data.preferences?.weatherAlerts ?? true,
-        riskAlerts: data.preferences?.riskAlerts ?? true,
-        trekReminders: data.preferences?.trekReminders ?? true
-      },
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt
-    };
   } catch (err) {
-    console.error('Failed to fetch trekker profile:', err);
-    throw err;
+    console.warn('Firestore profile fetch fallback to cached/default:', err);
   }
+
+  // Return cached data if Firestore fetch had network trouble
+  if (cachedData) {
+    return cachedData;
+  }
+
+  return null;
 }
 
 /**
- * Save or update trekker profile securely in Firestore
+ * Save or update trekker profile securely in Firestore & local backup
  */
 export async function saveTrekkerProfile(profile: TrekkerProfile): Promise<void> {
   if (!profile.uid) throw new Error('Missing User ID');
 
-  const docRef = doc(db, 'users', profile.uid);
   const now = new Date().toISOString();
 
   const dataToSave = {
@@ -104,7 +130,20 @@ export async function saveTrekkerProfile(profile: TrekkerProfile): Promise<void>
     updatedAt: now
   };
 
-  await setDoc(docRef, dataToSave, { merge: true });
+  // Always save locally so edits never fail even if offline
+  try {
+    localStorage.setItem(getLocalProfileKey(profile.uid), JSON.stringify({ ...profile, ...dataToSave }));
+  } catch (err) {
+    console.warn('Local profile write warning:', err);
+  }
+
+  // Persist to Firestore
+  try {
+    const docRef = doc(db, 'users', profile.uid);
+    await setDoc(docRef, dataToSave, { merge: true });
+  } catch (err) {
+    console.warn('Firestore write warning (persisted locally):', err);
+  }
 
   // Keep Firebase Auth profile in sync if display name or photo updated
   if (auth.currentUser && auth.currentUser.uid === profile.uid) {
