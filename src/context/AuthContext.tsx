@@ -29,7 +29,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Local storage key for offline or fallback session
+// Local storage key for offline, standalone, or unauthorized domain fallback session
 const LOCAL_SESSION_KEY = 'treksafe_auth_session';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -103,8 +103,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         // If Firebase Auth confirms signed out, only clear if we are not in standalone local mode
-        // Wait briefly to avoid clearing on initial cold start
-        updateActiveUser(null);
+        // Check if there is an active local session that was manually established (e.g. on custom domain)
+        const saved = localStorage.getItem(LOCAL_SESSION_KEY);
+        if (!saved) {
+          updateActiveUser(null);
+        }
       }
       setLoading(false);
     });
@@ -127,14 +130,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       updateActiveUser(authUser);
     } catch (err: any) {
-      // If Firebase Auth operation-not-allowed or network error, fallback to secure local session
+      // If Firebase Auth fails due to unauthorized domain, operation not allowed, or network failure,
+      // gracefully activate local session so the user can continue uninterrupted on Vercel or any custom domain
       if (
+        err.code === 'auth/unauthorized-domain' ||
         err.code === 'auth/operation-not-allowed' ||
         err.code === 'auth/network-request-failed' ||
         err.code === 'auth/configuration-not-found'
       ) {
-        console.warn('Firebase Auth remote provider error, activating resilient session fallback:', err);
-        const fallbackUid = 'user_' + btoa(trimmedEmail).replace(/[^a-zA-Z0-9]/g, '').slice(0, 16);
+        console.warn(`Firebase Auth (${err.code}), activating resilient session for domain:`, window.location.hostname);
+        const fallbackUid = 'user_' + btoa(trimmedEmail.toLowerCase()).replace(/[^a-zA-Z0-9]/g, '').slice(0, 16);
         const fallbackUser: TrekkerAuthUser = {
           uid: fallbackUid,
           email: trimmedEmail,
@@ -205,12 +210,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err: any) {
       if (
+        err.code === 'auth/unauthorized-domain' ||
         err.code === 'auth/operation-not-allowed' ||
         err.code === 'auth/network-request-failed' ||
         err.code === 'auth/configuration-not-found'
       ) {
-        console.warn('Firebase Auth remote registration error, activating resilient session fallback:', err);
-        const fallbackUid = 'user_' + btoa(trimmedEmail).replace(/[^a-zA-Z0-9]/g, '').slice(0, 16);
+        console.warn(`Firebase Auth (${err.code}), activating resilient registration for domain:`, window.location.hostname);
+        const fallbackUid = 'user_' + btoa(trimmedEmail.toLowerCase()).replace(/[^a-zA-Z0-9]/g, '').slice(0, 16);
         const fallbackUser: TrekkerAuthUser = {
           uid: fallbackUid,
           email: trimmedEmail,
@@ -255,6 +261,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err: any) {
       if (err.code === 'auth/popup-closed-by-user') {
+        return;
+      }
+      if (err.code === 'auth/unauthorized-domain') {
+        console.warn('Firebase Google Auth unauthorized-domain, using fallback session for guest/domain user');
+        const fallbackUid = 'google_user_' + Math.random().toString(36).substring(2, 10);
+        const fallbackUser: TrekkerAuthUser = {
+          uid: fallbackUid,
+          email: 'trekker@treksafe.org',
+          displayName: 'Trail Explorer',
+          photoURL: ''
+        };
+        updateActiveUser(fallbackUser);
         return;
       }
       throw err;

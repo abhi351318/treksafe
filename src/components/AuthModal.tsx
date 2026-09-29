@@ -88,6 +88,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setErrorMsg('Network error. Please check your internet connection.');
       } else if (err.code === 'auth/operation-not-allowed') {
         setErrorMsg('Email/Password provider is not enabled in Firebase Authentication console.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setErrorMsg('Domain not authorized in Firebase. Add your Vercel domain to Firebase Console > Authentication > Settings > Authorized Domains.');
       } else if (err.code === 'auth/too-many-requests') {
         setErrorMsg('Too many unsuccessful attempts. Please wait a moment and try again.');
       } else {
@@ -105,7 +107,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       onClose();
     } catch (err: any) {
       setIsLoading(false);
-      if (err.code !== 'auth/popup-closed-by-user') {
+      if (err.code === 'auth/unauthorized-domain') {
+        setErrorMsg('Domain not authorized in Firebase. Add your Vercel URL (e.g. *.vercel.app) to Firebase Console > Authentication > Settings > Authorized Domains.');
+      } else if (err.code !== 'auth/popup-closed-by-user') {
         setErrorMsg(err.message || 'Google authentication failed.');
       }
     }
