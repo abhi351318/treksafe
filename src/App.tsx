@@ -22,31 +22,24 @@ import { enrichTrekWithTrailway } from './services/trailPathwayService';
 import { db } from './services/firebase';
 import { collection, doc, setDoc, deleteDoc, getDocs, query, orderBy } from 'firebase/firestore';
 import {
-  Mountain,
   Compass,
   Bookmark,
-  Share2,
   Printer,
   Calendar,
   AlertTriangle,
   RotateCcw,
-  ShieldCheck,
-  CheckCircle,
-  ExternalLink,
-  ChevronRight,
   Sparkles,
   Key,
-  Info,
   User as UserIcon,
   LogIn,
   LogOut,
   Navigation,
   Route,
-  Flag,
-  Backpack,
+  Flame,
   Radio,
-  Activity,
-  Layers
+  Sliders,
+  Target,
+  Maximize2
 } from 'lucide-react';
 
 export default function App() {
@@ -76,7 +69,7 @@ export default function App() {
 
   const [savedTreks, setSavedTreks] = useState<TrekAnalysisResult[]>(() => {
     try {
-      const stored = localStorage.getItem('treksafe_saved_itineraries');
+      const stored = localStorage.getItem('apex_saved_itineraries');
       return stored ? JSON.parse(stored) : [];
     } catch {
       return [];
@@ -103,7 +96,7 @@ export default function App() {
           });
           if (userTreks.length > 0) {
             setSavedTreks(userTreks);
-            localStorage.setItem('treksafe_saved_itineraries', JSON.stringify(userTreks));
+            localStorage.setItem('apex_saved_itineraries', JSON.stringify(userTreks));
           }
         }
       } catch (err) {
@@ -135,11 +128,7 @@ export default function App() {
       setAnalysis(result);
     } catch (err: any) {
       console.error('Analysis error:', err);
-      if (err.message && err.message.includes('status 404')) {
-        setErrorMessage('Weather forecast telemetry unavailable for this location/date.');
-      } else {
-        setErrorMessage(err.message || 'Geospatial or weather sensor link interrupted.');
-      }
+      setErrorMessage(err.message || 'Geospatial or weather sensor link interrupted.');
     } finally {
       setIsLoading(false);
     }
@@ -174,7 +163,7 @@ export default function App() {
     const updated = [analysis, ...savedTreks];
     setSavedTreks(updated);
     try {
-      localStorage.setItem('treksafe_saved_itineraries', JSON.stringify(updated));
+      localStorage.setItem('apex_saved_itineraries', JSON.stringify(updated));
     } catch (e) {
       console.warn('Local storage write warning:', e);
     }
@@ -212,7 +201,7 @@ export default function App() {
     const itemToRemove = savedTreks[index];
     const updated = savedTreks.filter((_, i) => i !== index);
     setSavedTreks(updated);
-    localStorage.setItem('treksafe_saved_itineraries', JSON.stringify(updated));
+    localStorage.setItem('apex_saved_itineraries', JSON.stringify(updated));
 
     if (user && itemToRemove) {
       try {
@@ -230,111 +219,109 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F0D] text-[#E2E8E0] flex flex-col font-sans bg-topo-dark selection:bg-emerald-500/20 selection:text-emerald-300">
+    <div className="min-h-screen bg-[#0A0D14] text-[#E2E8F0] flex flex-col font-sans bg-apex-slate selection:bg-orange-500/30 selection:text-orange-300">
       
-      {/* Top Header / Tactical HUD Bar */}
-      <header className="sticky top-0 z-40 bg-[#0E1411]/90 backdrop-blur-md border-b border-white/10 shadow-2xl">
+      {/* Top Header / Aerospace Command Bar */}
+      <header className="sticky top-0 z-40 bg-[#0A0D14]/95 backdrop-blur-md border-b border-white/10 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
           
-          {/* Logo & Operational Status */}
+          {/* Logo & Platform Name */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shadow-[0_0_15px_rgba(52,211,153,0.2)]">
-              <Mountain className="w-5 h-5" />
+            <div className="w-8 h-8 bg-orange-500 text-black flex items-center justify-center font-black font-mono shadow-[0_0_20px_rgba(249,115,22,0.4)]">
+              ▲
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-sm sm:text-base font-mono font-extrabold text-white tracking-wider uppercase">
-                  TrekSafe AI
+                <h1 className="font-display text-lg sm:text-xl font-black text-white tracking-wider uppercase">
+                  APEXTRAIL OS
                 </h1>
-                <span className="text-[9px] font-mono font-bold tracking-widest px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                  EXPEDITION OS
+                <span className="text-[8px] font-mono font-bold tracking-widest px-1.5 py-0.2 bg-orange-500/20 text-orange-400 border border-orange-500/40">
+                  BUILD 4.2
                 </span>
               </div>
-              <p className="text-[10px] font-mono text-white/50 hidden sm:block">
-                Synoptic Alpine Microclimate & Machine Learning Trail Risk Engine
+              <p className="text-[10px] font-mono text-white/40 hidden sm:block">
+                Autonomous Alpine Risk Telemetry & Meteorological Forecasting
               </p>
             </div>
           </div>
 
           {/* Action Navigation Buttons */}
-          <div className="flex items-center gap-2">
-            {/* Trailhead Hub Finder */}
+          <div className="flex items-center gap-2 font-mono text-xs">
+            {/* Trailhead Catalog */}
             <button
               onClick={() => setIsNearbyModalOpen(true)}
-              className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer"
-              title="Regional Summit Directory"
+              className="px-3 py-1.5 bg-[#141B2B] hover:bg-white/10 border border-white/10 text-white flex items-center gap-1.5 transition-all cursor-pointer"
+              title="Global Summit Directory"
             >
-              <Navigation className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline">Directory</span>
+              <Navigation className="w-3.5 h-3.5 text-orange-400" />
+              <span className="hidden sm:inline">INDEX</span>
             </button>
 
             {/* Saved Treks */}
             <button
               onClick={() => setIsSavedModalOpen(true)}
-              className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer relative"
-              title="Archived Itineraries"
+              className="px-3 py-1.5 bg-[#141B2B] hover:bg-white/10 border border-white/10 text-white flex items-center gap-1.5 transition-all cursor-pointer relative"
+              title="Saved Expeditions"
             >
-              <Bookmark className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline">Archived</span>
+              <Bookmark className="w-3.5 h-3.5 text-orange-400" />
+              <span className="hidden sm:inline">ARCHIVES</span>
               {savedTreks.length > 0 && (
-                <span className="w-4 h-4 rounded-full bg-emerald-500 text-black text-[9px] font-bold flex items-center justify-center">
+                <span className="w-4 h-4 bg-orange-500 text-black text-[9px] font-bold flex items-center justify-center ml-0.5">
                   {savedTreks.length}
                 </span>
               )}
             </button>
 
-            {/* API Settings */}
+            {/* API Config */}
             <button
               onClick={() => setIsApiModalOpen(true)}
-              className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-xl transition-all cursor-pointer"
-              title="Google Maps API Config"
+              className="p-1.5 bg-[#141B2B] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-all cursor-pointer"
+              title="Maps API Settings"
             >
-              <Key className="w-3.5 h-3.5 text-emerald-400" />
+              <Key className="w-3.5 h-3.5 text-orange-400" />
             </button>
 
-            {/* Auth / Account Controls */}
+            {/* Auth / Profile */}
             {user ? (
-              <div className="flex items-center gap-1.5 pl-1 border-l border-white/10">
+              <div className="flex items-center gap-1.5 pl-2 border-l border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsProfileModalOpen(true)}
-                  className="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl text-xs font-mono font-bold text-emerald-300 flex items-center gap-1.5 max-w-[170px] truncate transition-all cursor-pointer"
-                  title="View and edit your personal trekker dossier"
+                  className="px-2.5 py-1 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-xs font-bold text-orange-300 flex items-center gap-1.5 max-w-[170px] truncate transition-all cursor-pointer"
                 >
-                  <UserIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span className="truncate">{user.displayName || user.email?.split('@')[0] || 'Trekker'}</span>
-                  <span className="text-[9px] uppercase tracking-wider font-semibold text-emerald-400/80 ml-0.5 hidden md:inline">
-                    • Profile
+                  <UserIcon className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                  <span className="truncate">{user.displayName || user.email?.split('@')[0] || 'Explorer'}</span>
+                  <span className="text-[8px] uppercase tracking-wider text-orange-400/80 hidden md:inline">
+                    // DOSSIER
                   </span>
                 </button>
                 <button
                   onClick={() => logout()}
-                  className="p-1.5 bg-white/5 hover:bg-rose-500/20 border border-white/10 text-white/60 hover:text-rose-400 rounded-xl transition-all cursor-pointer"
+                  className="p-1.5 bg-[#141B2B] hover:bg-rose-500/20 border border-white/10 text-white/60 hover:text-rose-400 transition-all cursor-pointer"
                   title="Sign Out"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 pl-1 border-l border-white/10">
+              <div className="flex items-center gap-1.5 pl-2 border-l border-white/10">
                 <button
                   onClick={() => {
                     setAuthModalMode('login');
                     setIsAuthModalOpen(true);
                   }}
-                  className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs font-mono font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                  className="px-2.5 py-1.5 bg-[#141B2B] hover:bg-white/10 border border-white/10 text-white transition-all cursor-pointer"
                 >
-                  <LogIn className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Login</span>
+                  LOGIN
                 </button>
                 <button
                   onClick={() => {
                     setAuthModalMode('register');
                     setIsAuthModalOpen(true);
                   }}
-                  className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-mono rounded-xl text-xs font-bold transition-all cursor-pointer hidden sm:flex items-center gap-1"
+                  className="px-3 py-1.5 bg-orange-500 hover:bg-orange-400 text-black font-bold transition-all cursor-pointer hidden sm:block"
                 >
-                  <span>Register</span>
+                  REGISTER
                 </button>
               </div>
             )}
@@ -343,11 +330,11 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Content Area */}
+      {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
 
-        {/* Input Panel Card (Location Search & Date Picker) */}
-        <section className="bg-[#111714] border border-white/10 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-5">
+        {/* Input Command Strip */}
+        <section className="bg-[#0F1420] border border-white/10 p-5 sm:p-6 shadow-2xl space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-end">
             
             {/* Location search column */}
@@ -368,23 +355,23 @@ export default function App() {
               />
             </div>
 
-            {/* Analyze Action Button */}
+            {/* Execute Button */}
             <div className="lg:col-span-2">
               <button
                 type="button"
                 disabled={isLoading}
                 onClick={() => runAnalysis(selectedTrek, selectedDate)}
-                className="w-full py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl text-xs sm:text-sm font-mono font-bold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(52,211,153,0.25)] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full py-2.5 px-4 bg-orange-500 hover:bg-orange-400 text-black text-xs sm:text-sm font-mono font-black uppercase tracking-wider transition-all shadow-[0_0_25px_rgba(249,115,22,0.3)] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {isLoading ? (
                   <>
                     <RotateCcw className="w-4 h-4 animate-spin text-black" />
-                    <span>Computing...</span>
+                    <span>CALCULATING...</span>
                   </>
                 ) : (
                   <>
-                    <Compass className="w-4 h-4 text-black" />
-                    <span>Run Analysis</span>
+                    <Target className="w-4 h-4 text-black" />
+                    <span>COMPUTE RISK</span>
                   </>
                 )}
               </button>
@@ -393,7 +380,7 @@ export default function App() {
           </div>
         </section>
 
-        {/* Dedicated City & Mountain Hub Explorer */}
+        {/* Regional Base & Mountain Hub Explorer */}
         <CityTrekExplorer
           selectedTrek={selectedTrek}
           onSelectTrek={(trek) => {
@@ -402,101 +389,98 @@ export default function App() {
           disabled={isLoading}
         />
 
-        {/* Loading Progress State */}
+        {/* Progress State */}
         {isLoading && (
-          <div className="py-12 bg-[#111714]/80 border border-white/10 rounded-2xl text-center space-y-3 shadow-2xl">
-            <div className="w-12 h-12 rounded-full border-2 border-white/10 border-t-emerald-400 animate-spin mx-auto" />
-            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
-              Running Alpine Microclimate Inference & Risk Matrix
+          <div className="py-12 bg-[#0F1420]/90 border border-white/10 text-center space-y-3">
+            <div className="w-10 h-10 border-2 border-white/10 border-t-orange-500 animate-spin mx-auto" />
+            <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-white">
+              RUNNING ALPINE RISK SIMULATION MATRIX
             </h3>
             <p className="text-xs text-white/50 max-w-sm mx-auto font-mono">
-              Extracting Open-Meteo vectors, engineering altitude exposure, and executing SHAP feature attribution...
+              Interrogating Open-Meteo satellite arrays, computing adiabatic lapse rates, and calculating SHAP vectors...
             </p>
           </div>
         )}
 
         {/* Error State Banner */}
         {errorMessage && !isLoading && (
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 flex items-start gap-3 font-mono">
+          <div className="p-4 bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-start gap-3 font-mono">
             <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <h4 className="text-xs font-bold uppercase">Analysis Interrupted</h4>
+              <h4 className="text-xs font-bold uppercase">TELEMETRY ANOMALY DETECTED</h4>
               <p className="text-xs text-rose-200">{errorMessage}</p>
               <button
                 onClick={() => runAnalysis(selectedTrek, selectedDate)}
                 className="text-xs font-bold underline text-rose-300 hover:text-white pt-1 block cursor-pointer"
               >
-                Retry Telemetry Fetch
+                Retry Uplink
               </button>
             </div>
           </div>
         )}
 
-        {/* Analysis Results Display */}
+        {/* Results Stream */}
         {analysis && !isLoading && (
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="space-y-6 animate-in fade-in duration-200">
             
-            {/* Trail Title & Header Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#111714] p-5 rounded-2xl border border-white/10 shadow-xl">
+            {/* Trail Heading Card */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0F1420] p-5 sm:p-6 border border-white/10">
               <div>
-                <div className="flex items-center gap-2 text-[10px] font-mono text-emerald-400 uppercase tracking-wider">
-                  <span>EXPEDITION TARGET</span>
+                <div className="flex items-center gap-2 text-[10px] font-mono text-orange-400 uppercase tracking-widest">
+                  <span>EXPEDITION VECTOR</span>
                   <span>•</span>
-                  <span>{analysis.trek.trailDifficulty || 'Moderate'}</span>
+                  <span>{analysis.trek.trailDifficulty || 'MODERATE'}</span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-bold font-mono text-white tracking-tight">
+                <h2 className="font-display text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">
                   {analysis.trek.name}
                 </h2>
                 <p className="text-xs font-mono text-white/50">
-                  {analysis.trek.region} • Elevation ~{analysis.trek.elevation || analysis.weather.elevation}m MSL
+                  {analysis.trek.region} • ALTITUDE {analysis.trek.elevation || analysis.weather.elevation}M MSL
                 </p>
 
                 {analysis.trek.startPoint && analysis.trek.endPoint && (
-                  <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-white/5 text-[11px] font-mono">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                      Start: {analysis.trek.startPoint.name}
+                  <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-white/5 text-[10px] font-mono">
+                    <span className="px-2 py-0.5 bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                      TRAILHEAD: {analysis.trek.startPoint.name}
                     </span>
-                    <span className="text-white/30">→</span>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-                      Summit: {analysis.trek.endPoint.name}
+                    <span className="text-white/40">→</span>
+                    <span className="px-2 py-0.5 bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                      SUMMIT: {analysis.trek.endPoint.name}
                     </span>
                     {analysis.trek.trailLengthKm && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 text-white/60 border border-white/5">
-                        <Route className="w-3 h-3 text-emerald-400" />
-                        {analysis.trek.trailLengthKm} km route
+                      <span className="px-2 py-0.5 bg-[#141B2B] text-white/60 border border-white/5">
+                        {analysis.trek.trailLengthKm} KM MAPPED
                       </span>
                     )}
                   </div>
                 )}
               </div>
 
-              {/* Action Buttons for Results */}
-              <div className="flex items-center gap-2 shrink-0">
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 shrink-0 font-mono text-xs">
                 <button
                   onClick={handleSaveTrek}
-                  className="px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="px-3.5 py-2 bg-[#141B2B] hover:bg-white/10 border border-white/10 text-white font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                 >
-                  <Bookmark className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>{saveSuccessNotice ? 'Archived!' : 'Bookmark Trail'}</span>
+                  <Bookmark className="w-3.5 h-3.5 text-orange-400" />
+                  <span>{saveSuccessNotice ? 'ARCHIVED!' : 'ARCHIVE ROUTE'}</span>
                 </button>
 
                 <button
                   onClick={handleExportReport}
-                  className="px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="px-3.5 py-2 bg-[#141B2B] hover:bg-white/10 border border-white/10 text-white font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5 text-white/60" />
-                  <span className="hidden sm:inline">Print Dossier</span>
+                  <span className="hidden sm:inline">PRINT DOSSIER</span>
                 </button>
               </div>
             </div>
 
-            {/* 1. Large Readable Risk Score & Recommendation */}
+            {/* 1. Industrial Risk Gauge & Segmented Readout */}
             <RiskScore risk={analysis.risk} />
 
-            {/* 2. Geospatial Interactive Google Map & Weather Summary Cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* 2. Side-by-Side Map & Atmospheric Synopsis */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
               {/* Map Column */}
               <div className="lg:col-span-7">
                 <MapView
@@ -505,39 +489,44 @@ export default function App() {
                 />
               </div>
 
-              {/* Weather Summary Column */}
+              {/* Weather Synopsis Column */}
               <div className="lg:col-span-5 flex flex-col justify-between space-y-3">
-                <div className="bg-[#111714] border border-white/10 rounded-2xl p-5 shadow-xl flex-1 flex flex-col justify-between">
+                <div className="bg-[#0F1420] border border-white/10 p-5 flex-1 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
-                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-                        <Radio className="w-3.5 h-3.5 text-emerald-400" /> Synoptic Meteorological Brief
-                      </h3>
-                      <span className="text-xs font-mono text-emerald-400">
+                      <div>
+                        <span className="font-mono text-[9px] tracking-widest uppercase text-orange-400 font-bold block">
+                          METEOROLOGICAL SENSORS
+                        </span>
+                        <h3 className="font-display text-sm font-bold text-white tracking-tight">
+                          Synoptic Profile
+                        </h3>
+                      </div>
+                      <span className="text-xs font-mono text-orange-400">
                         {analysis.date}
                       </span>
                     </div>
 
                     <p className="text-xs text-white/70 leading-relaxed mb-4 font-sans">
-                      Forecast for <strong>{analysis.date}</strong> indicates daylight temperature modeled at <strong>{analysis.weather.temperature}°C</strong> (perceived feels-like index: {analysis.weather.feelsLike}°C). Rain probability is calculated at <strong>{analysis.weather.rainProbability}%</strong> with gusts up to <strong>{analysis.weather.windGust} km/h</strong>.
+                      Target date <strong>{analysis.date}</strong> models temperature at <strong>{analysis.weather.temperature}°C</strong> (chill factor {analysis.weather.feelsLike}°C). Precipitation likelihood is calculated at <strong>{analysis.weather.rainProbability}%</strong> with gusts up to <strong>{analysis.weather.windGust} km/h</strong>.
                     </p>
                   </div>
 
                   <div className="space-y-2 text-xs font-mono border-t border-white/5 pt-3">
                     <div className="flex items-center justify-between py-1 border-b border-white/5">
-                      <span className="text-white/50">Cumulative Rain</span>
+                      <span className="text-white/40">Rain Accumulation</span>
                       <strong className="text-white">{analysis.weather.rainAmount} mm</strong>
                     </div>
                     <div className="flex items-center justify-between py-1 border-b border-white/5">
-                      <span className="text-white/50">Cloud Cover</span>
+                      <span className="text-white/40">Cloud Cover</span>
                       <strong className="text-white">{analysis.weather.cloudCover}%</strong>
                     </div>
                     <div className="flex items-center justify-between py-1 border-b border-white/5">
-                      <span className="text-white/50">Wind Direction</span>
-                      <strong className="text-white">{analysis.weather.windDirection}° Azimuth</strong>
+                      <span className="text-white/40">Azimuth Direction</span>
+                      <strong className="text-white">{analysis.weather.windDirection}°</strong>
                     </div>
                     <div className="flex items-center justify-between py-1">
-                      <span className="text-white/50">Thunderstorm Probability</span>
+                      <span className="text-white/40">Lightning Index</span>
                       <strong className={`${analysis.weather.thunderstormProbability > 25 ? 'text-rose-400' : 'text-emerald-400'}`}>
                         {analysis.weather.thunderstormProbability}%
                       </strong>
@@ -545,35 +534,32 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Trail Readiness Banner */}
-                <div className="p-3.5 rounded-xl bg-emerald-500/[0.04] border border-emerald-500/20 flex items-center justify-between text-xs font-mono">
-                  <div className="flex items-center gap-2">
-                    <Backpack className="w-4 h-4 text-emerald-400" />
-                    <span className="text-white/80">Packing Manifest Aligned</span>
-                  </div>
-                  <span className="text-emerald-400 font-bold uppercase">
-                    Model Ready
+                {/* Status Indicator */}
+                <div className="p-3 bg-[#141B2B] border border-white/10 flex items-center justify-between text-xs font-mono">
+                  <span className="text-white/60">PACKING PROTOCOL ALIGNED</span>
+                  <span className="text-orange-400 font-bold uppercase">
+                    TELEMETRY LOCKED
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* 3. Major Trek Checklist & Gear Essentials */}
+            {/* 3. Expedition Gear Manifest */}
             <TrekChecklist
               weather={analysis.weather}
               trailName={analysis.trek.name}
             />
 
-            {/* 4. Detailed 6-Tile Weather Metrics */}
+            {/* 4. Sharp 6-Block Weather Metrics */}
             <WeatherCard weather={analysis.weather} />
 
-            {/* 5. Key Trail Hazard & Weather Factors */}
+            {/* 5. Explainable Feature Attributions */}
             <RiskFactors
               factors={analysis.risk.factors}
               baseRisk={analysis.risk.baseRisk}
             />
 
-            {/* 6. 24-Hour Diurnal Weather Timeline */}
+            {/* 6. Chronological 24-Hour Scrubber */}
             <WeatherTimeline
               hourly={analysis.weather.hourly}
               forecastDate={analysis.date}
@@ -584,20 +570,19 @@ export default function App() {
 
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-white/10 bg-[#0E1411] py-6 text-xs text-white/40 font-mono mt-12">
+      {/* Industrial Footer */}
+      <footer className="border-t border-white/10 bg-[#080B12] py-6 text-xs text-white/40 font-mono mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Mountain className="w-4 h-4 text-emerald-400" />
-            <span className="font-bold text-white">TrekSafe AI</span>
+            <span className="text-orange-500 font-bold">▲ APEXTRAIL OS</span>
             <span>— Alpine Meteorological Risk Prediction Platform</span>
           </div>
           <div className="flex items-center gap-4 text-[10px]">
-            <span>Google Maps Geospatial Vectors</span>
+            <span>Google Maps Platform</span>
             <span>•</span>
-            <span>Open-Meteo High-Resolution Telemetry</span>
+            <span>Open-Meteo High-Resolution Model</span>
             <span>•</span>
-            <span>Encrypted Firestore Sync</span>
+            <span>Firestore Persistent Storage</span>
           </div>
         </div>
       </footer>

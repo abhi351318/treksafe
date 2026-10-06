@@ -2,53 +2,59 @@
 
 @layer base {
   body {
-    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
-    background-color: #0B0F0D;
-    color: #E2E8E0;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: #0A0D14;
+    color: #E2E8F0;
     overflow-x: hidden;
   }
   
+  h1, h2, h3, .font-display {
+    font-family: 'Syne', sans-serif;
+  }
+
   code, pre, .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
   }
 }
 
-/* Subtle tactical topographic grid lines */
-.bg-topo-dark {
-  background-color: #0B0F0D;
+/* Atmospheric Night-Sky Grid & Nebula Glow */
+.bg-apex-slate {
+  background-color: #0A0D14;
   background-image: 
-    linear-gradient(to right, rgba(52, 211, 153, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(52, 211, 153, 0.04) 1px, transparent 1px);
-  background-size: 32px 32px;
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(249, 115, 22, 0.12), transparent),
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
 }
 
-.radar-sweep-bg {
-  background: radial-gradient(circle at 50% 0%, rgba(30, 58, 43, 0.45) 0%, rgba(11, 15, 13, 0.95) 75%);
-}
-
-/* Glass & tactical borders */
-.tactical-panel {
-  background: #111714;
+/* Crisp Sharp-Cornered Aerospace Panel Styling */
+.apex-card {
+  background: #101522;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.6);
-}
-
-.tactical-panel:hover {
-  border-color: rgba(52, 211, 153, 0.22);
-}
-
-/* Custom scrollbars */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: #0B0F0D;
-}
-::-webkit-scrollbar-thumb {
-  background: #23332A;
   border-radius: 4px;
 }
+
+.apex-card:hover {
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+/* Chamfered cut-corner badge aesthetic */
+.chamfer-sm {
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+}
+
+/* Custom crisp technical scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0D14;
+}
+::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 0px;
+}
 ::-webkit-scrollbar-thumb:hover {
-  background: #34D399;
+  background: #F97316;
 }

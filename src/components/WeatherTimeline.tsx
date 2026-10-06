@@ -21,7 +21,6 @@ export const WeatherTimeline: React.FC<WeatherTimelineProps> = ({ hourly, foreca
     return null;
   }
 
-  // Sample key operational intervals across 24 hours
   const targetHourMarkers = ['06:00', '09:00', '12:00', '15:00', '18:00', '21:00'];
   const filteredHourly = hourly.filter((h) =>
     targetHourMarkers.includes(h.time)
@@ -48,18 +47,22 @@ export const WeatherTimeline: React.FC<WeatherTimelineProps> = ({ hourly, foreca
   };
 
   return (
-    <div className="bg-[#111714] border border-white/10 rounded-2xl p-5 sm:p-6 space-y-4">
+    <div className="bg-[#0F1420] border border-white/10 p-5 sm:p-6 space-y-4">
       <div className="flex items-center justify-between border-b border-white/10 pb-3">
-        <h3 className="text-xs sm:text-sm font-bold font-mono uppercase tracking-wider text-white flex items-center gap-2">
-          <Clock className="w-4 h-4 text-emerald-400" />
-          Diurnal Chronological Forecast (24-Hour Windows)
-        </h3>
+        <div>
+          <span className="font-mono text-[10px] tracking-widest uppercase text-orange-400 font-bold block">
+            CHRONOLOGICAL SCRUBBER
+          </span>
+          <h3 className="font-display text-base sm:text-lg font-bold text-white tracking-tight mt-0.5">
+            24-Hour Diurnal Weather Outlook
+          </h3>
+        </div>
         <span className="text-xs font-mono text-white/40">
-          {forecastDate} • Open-Meteo Telemetry
+          {forecastDate} • SATELLITE HORIZON
         </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-1">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 pt-1">
         {displayHours.map((hour, idx) => {
           const isHighWind = hour.windSpeed > 25 || hour.windGust > 35;
           const isRainRisk = hour.rainProbability >= 40;
@@ -67,12 +70,12 @@ export const WeatherTimeline: React.FC<WeatherTimelineProps> = ({ hourly, foreca
           return (
             <div
               key={idx}
-              className={`p-3.5 rounded-xl border transition-all text-center space-y-2 ${
+              className={`p-3.5 border transition-all text-center space-y-2 ${
                 isRainRisk
-                  ? 'bg-blue-500/10 border-blue-500/30'
+                  ? 'bg-blue-500/10 border-blue-500/40'
                   : isHighWind
-                  ? 'bg-amber-500/10 border-amber-500/30'
-                  : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                  ? 'bg-amber-500/10 border-amber-500/40'
+                  : 'bg-[#101522] border-white/10 hover:border-white/20'
               }`}
             >
               <div className="font-mono text-xs font-bold text-white/90">
@@ -83,21 +86,21 @@ export const WeatherTimeline: React.FC<WeatherTimelineProps> = ({ hourly, foreca
                 {getConditionIcon(hour.weatherCode, hour.rainProbability, hour.isDay)}
               </div>
 
-              <div className="text-lg font-mono font-extrabold text-white">
-                {hour.temperature}°<span className="text-xs text-white/50">C</span>
+              <div className="text-xl font-mono font-black text-white">
+                {hour.temperature}°
               </div>
 
-              <div className="space-y-1 text-[11px] font-mono border-t border-white/5 pt-2">
+              <div className="space-y-1 text-[10px] font-mono border-t border-white/5 pt-2">
                 <div className="flex items-center justify-between text-blue-400">
-                  <span className="text-white/40">Rain:</span>
+                  <span className="text-white/40">RAIN</span>
                   <span>{hour.rainProbability}%</span>
                 </div>
-                <div className="flex items-center justify-between text-teal-400">
-                  <span className="text-white/40">Wind:</span>
+                <div className="flex items-center justify-between text-cyan-400">
+                  <span className="text-white/40">WIND</span>
                   <span>{hour.windSpeed} km/h</span>
                 </div>
                 <div className="flex items-center justify-between text-white/60">
-                  <span className="text-white/40">Gust:</span>
+                  <span className="text-white/40">GUST</span>
                   <span>{hour.windGust} km/h</span>
                 </div>
               </div>

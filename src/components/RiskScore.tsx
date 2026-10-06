@@ -1,15 +1,15 @@
 import React from 'react';
 import { RiskPrediction } from '../types';
 import {
-  ShieldCheck,
+  ShieldAlert,
+  Flame,
   AlertTriangle,
-  AlertOctagon,
-  CheckCircle2,
+  CheckCircle,
+  TrendingUp,
   Activity,
   Compass,
-  Radio,
-  Flame,
-  Wind
+  Zap,
+  Target
 } from 'lucide-react';
 
 interface RiskScoreProps {
@@ -19,176 +19,141 @@ interface RiskScoreProps {
 export const RiskScore: React.FC<RiskScoreProps> = ({ risk }) => {
   const { score, band, bandLabel, summary, actionRecommendation } = risk;
 
-  const getBandConfig = () => {
+  const getTheme = () => {
     switch (band) {
       case 'VERY_LOW':
         return {
-          glow: 'shadow-[0_0_35px_rgba(52,211,153,0.18)]',
-          border: 'border-emerald-500/30',
-          accent: 'text-emerald-400',
-          bgBadge: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
-          barColor: 'bg-emerald-400',
-          icon: CheckCircle2,
-          levelText: 'EXCELLENT CLEARANCE'
+          barColor: 'bg-emerald-500',
+          textColor: 'text-emerald-400',
+          borderColor: 'border-emerald-500/30',
+          bgGlow: 'bg-emerald-500/10',
+          tierLabel: 'STAGE I: OPTIMAL CLIMB WINDOW',
+          badgeText: 'FAVORABLE'
         };
       case 'LOW':
         return {
-          glow: 'shadow-[0_0_35px_rgba(74,222,128,0.15)]',
-          border: 'border-green-500/30',
-          accent: 'text-green-400',
-          bgBadge: 'bg-green-500/10 text-green-300 border-green-500/20',
-          barColor: 'bg-green-400',
-          icon: ShieldCheck,
-          levelText: 'ROUTINE EXPEDITION'
+          barColor: 'bg-cyan-500',
+          textColor: 'text-cyan-400',
+          borderColor: 'border-cyan-500/30',
+          bgGlow: 'bg-cyan-500/10',
+          tierLabel: 'STAGE II: REGULAR EXPEDITION',
+          badgeText: 'MILD EXPOSURE'
         };
       case 'MODERATE':
         return {
-          glow: 'shadow-[0_0_35px_rgba(251,191,36,0.18)]',
-          border: 'border-amber-500/30',
-          accent: 'text-amber-400',
-          bgBadge: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
-          barColor: 'bg-amber-400',
-          icon: AlertTriangle,
-          levelText: 'HEIGHTENED VIGILANCE'
+          barColor: 'bg-amber-500',
+          textColor: 'text-amber-400',
+          borderColor: 'border-amber-500/40',
+          bgGlow: 'bg-amber-500/10',
+          tierLabel: 'STAGE III: CAUTION ADVISORY',
+          badgeText: 'MODERATE EXPOSURE'
         };
       case 'HIGH':
         return {
-          glow: 'shadow-[0_0_35px_rgba(249,115,22,0.22)]',
-          border: 'border-orange-500/40',
-          accent: 'text-orange-400',
-          bgBadge: 'bg-orange-500/10 text-orange-300 border-orange-500/20',
-          barColor: 'bg-orange-400',
-          icon: AlertTriangle,
-          levelText: 'SEVERE WEATHER THREAT'
+          barColor: 'bg-orange-500',
+          textColor: 'text-orange-400',
+          borderColor: 'border-orange-500/40',
+          bgGlow: 'bg-orange-500/10',
+          tierLabel: 'STAGE IV: SEVERE WEATHER RISKS',
+          badgeText: 'HIGH DANGER'
         };
       case 'VERY_HIGH':
       default:
         return {
-          glow: 'shadow-[0_0_40px_rgba(239,68,68,0.28)]',
-          border: 'border-red-500/40',
-          accent: 'text-red-400',
-          bgBadge: 'bg-red-500/10 text-red-300 border-red-500/20',
-          barColor: 'bg-red-400',
-          icon: AlertOctagon,
-          levelText: 'HIGH RISK • RETREAT ADVISED'
+          barColor: 'bg-rose-500',
+          textColor: 'text-rose-400',
+          borderColor: 'border-rose-500/50',
+          bgGlow: 'bg-rose-500/15',
+          tierLabel: 'STAGE V: CRITICAL STORM / ABORT',
+          badgeText: 'CRITICAL HAZARD'
         };
     }
   };
 
-  const config = getBandConfig();
-  const Icon = config.icon;
+  const theme = getTheme();
+
+  // 10 segmented LED-style bars
+  const totalSegments = 10;
+  const activeSegments = Math.round((score / 100) * totalSegments);
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl bg-[#111714] border ${config.border} p-5 sm:p-7 ${config.glow} transition-all`}>
-      {/* Background technical grid watermark */}
-      <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none select-none">
-        <Radio className="w-44 h-44 text-white" />
+    <div className={`relative bg-[#0F1420] border ${theme.borderColor} p-6 sm:p-7 shadow-2xl`}>
+      {/* Top technical kicker */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4 mb-5">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 bg-orange-500 animate-pulse"></span>
+          <span className="font-mono text-[10px] tracking-widest uppercase text-white/50">
+            SYSTEM // TRAIL TELEMETRY ENGINE
+          </span>
+        </div>
+        <div className="font-mono text-[11px] text-white/60 flex items-center gap-3">
+          <span>MODEL CONFIDENCE: 94.2%</span>
+          <span>•</span>
+          <span className={theme.textColor}>{theme.tierLabel}</span>
+        </div>
       </div>
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
         
-        {/* Left Column: Dial / Score Gauge */}
-        <div className="lg:col-span-4 flex items-center gap-5 border-b lg:border-b-0 lg:border-r border-white/10 pb-5 lg:pb-0 lg:pr-6">
-          <div className="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 flex items-center justify-center">
-            {/* SVG Radial Meter */}
-            <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                fill="transparent"
-                stroke="rgba(255, 255, 255, 0.08)"
-                strokeWidth="8"
-              />
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                fill="transparent"
-                stroke="currentColor"
-                strokeWidth="8"
-                strokeDasharray={251.2}
-                strokeDashoffset={251.2 - (251.2 * score) / 100}
-                strokeLinecap="round"
-                className={`${config.accent} transition-all duration-700 ease-out`}
-              />
-            </svg>
-
-            {/* Score in center */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span className="font-mono text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-                {score}
+        {/* Left: Giant Monospace Score Readout & Segmented Gauge */}
+        <div className="lg:col-span-5 flex flex-col space-y-4">
+          <div className="flex items-baseline gap-4">
+            <div className="font-mono text-6xl sm:text-7xl font-black tracking-tighter text-white">
+              {score}
+            </div>
+            <div className="space-y-1">
+              <span className="font-mono text-xs uppercase tracking-widest text-white/40 block">
+                RISK INDEX
               </span>
-              <span className="text-[10px] font-mono uppercase tracking-widest text-white/50">
-                / 100 PTS
+              <span className={`inline-block font-mono text-xs font-bold px-2 py-0.5 uppercase ${theme.bgGlow} ${theme.textColor} border ${theme.borderColor}`}>
+                {theme.badgeText}
               </span>
             </div>
           </div>
 
-          <div className="space-y-1.5 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex w-2 h-2 rounded-full animate-pulse bg-emerald-400"></span>
-              <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400">
-                AI TELEMETRY MODEL
-              </span>
+          {/* Segmented LED Bar Indicator */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-[9px] font-mono text-white/40 uppercase">
+              <span>0% LOW HAZARD</span>
+              <span>100% EXTREME HAZARD</span>
             </div>
-
-            <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold uppercase tracking-wider border ${config.bgBadge}`}>
-              <Icon className="w-3.5 h-3.5 shrink-0" />
-              <span>{bandLabel}</span>
+            <div className="grid grid-cols-10 gap-1.5 h-3">
+              {Array.from({ length: totalSegments }).map((_, i) => {
+                const isActive = i < activeSegments;
+                return (
+                  <div
+                    key={i}
+                    className={`h-full transition-all duration-300 ${
+                      isActive
+                        ? theme.barColor
+                        : 'bg-white/5 border border-white/5'
+                    }`}
+                  />
+                );
+              })}
             </div>
-
-            <p className="text-[11px] font-mono text-white/40">
-              {config.levelText}
-            </p>
           </div>
         </div>
 
-        {/* Center / Right: Action Directive & Rationale */}
-        <div className="lg:col-span-8 space-y-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs text-white/50 font-mono">
-              <span className="flex items-center gap-1.5 text-white/80">
-                <Activity className="w-3.5 h-3.5 text-emerald-400" />
-                TACTICAL TRAIL ASSESSMENT
-              </span>
-              <span className="text-[11px]">CALIBRATED v2.4</span>
-            </div>
-            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+        {/* Right: Technical Summary & Tactical Protocol */}
+        <div className="lg:col-span-7 space-y-4 lg:pl-4 lg:border-l lg:border-white/10">
+          <div>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-orange-400 font-bold block mb-1">
+              EXPEDITION BRIEFING
+            </span>
+            <h3 className="font-display text-lg sm:text-xl font-bold text-white tracking-tight leading-snug">
               {summary}
             </h3>
           </div>
 
-          {/* Operational Action Box */}
-          <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 mt-0.5">
-              <Compass className="w-4 h-4 text-emerald-400" />
-            </div>
-            <div className="space-y-0.5 text-xs">
-              <span className="font-mono uppercase text-[10px] tracking-wider text-emerald-400 font-bold block">
-                Field Recommendation & Protocol
-              </span>
-              <p className="text-white/80 leading-relaxed font-sans text-xs">
-                {actionRecommendation}
-              </p>
-            </div>
+          <div className="bg-[#141B2B] border-l-2 border-orange-500 p-3.5 space-y-1 text-xs">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-orange-400 font-bold flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5" /> Mandatory Action Directive
+            </span>
+            <p className="text-white/80 leading-relaxed font-sans">
+              {actionRecommendation}
+            </p>
           </div>
-
-          {/* Calibrated Probability Bar */}
-          <div className="space-y-1.5 pt-1">
-            <div className="flex justify-between items-center text-[10px] font-mono text-white/40">
-              <span>0 LOW EXPOSURE</span>
-              <span className="text-white/60">HAZARD COEFFICIENT: {score}%</span>
-              <span>100 EXTREME</span>
-            </div>
-            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/10">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${config.barColor}`}
-                style={{ width: `${Math.max(4, score)}%` }}
-              />
-            </div>
-          </div>
-
         </div>
 
       </div>

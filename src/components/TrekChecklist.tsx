@@ -5,9 +5,10 @@ import {
   Square,
   ShieldAlert,
   Backpack,
-  Compass,
   RotateCcw,
-  Sparkles
+  Sparkles,
+  Sliders,
+  AlertCircle
 } from 'lucide-react';
 
 interface TrekChecklistProps {
@@ -34,33 +35,33 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
       {
         id: 'water',
         category: 'Trail Sustenance',
-        title: isHot ? 'Hydration (3.0L Water + Electrolytes)' : 'Hydration Reservoir (2.0L - 2.5L Water)',
+        title: isHot ? 'Hydration Reserve (3.0L Hydration Bladder + Electrolytes)' : 'Hydration Reserve (2.0L - 2.5L Flasks)',
         description: isHot
-          ? 'High temperatures require oral rehydration salts & minimum 3 liters of water.'
-          : 'Essential hydration bladder or insulated flasks for sustained summit push.',
+          ? 'Thermal heat load triggers accelerated water loss. Ensure mineral electrolyte replacement.'
+          : 'High altitude pulmonary respiration demands consistent hydration intake.',
         isPriority: true
       },
       {
         id: 'boots',
         category: 'Essentials',
-        title: 'Trekking Footwear & Anti-Blister Socks',
+        title: 'Trekking Boots with Deep Vibram/Lug Grip & Merino Socks',
         description: isRainy
-          ? 'Waterproof high-traction lug boots with deep grip for slick muddy terrain.'
-          : 'Broken-in ankle-support trail hiking shoes with merino wool socks.',
+          ? 'Slick loam and wet granite monolith surfaces demand aggressive sole traction.'
+          : 'Broken-in ankle-support boots preventing foot fatigue and blister formation.',
         isPriority: true
       },
       {
         id: 'nav',
         category: 'Safety & Navigation',
-        title: 'Offline GPS Track / Downloaded Map & Powerbank',
-        description: 'Dense canopy & mountain valleys lose cellular coverage. Keep backup offline GPX trailway.',
+        title: 'Satellite GPX Offline Nav & 20,000mAh Power Reserve',
+        description: 'Deep wilderness ravines lack cellular signals. Ensure offline offline trail cache.',
         isPriority: true
       },
       {
         id: 'firstaid',
         category: 'Safety & Navigation',
-        title: 'Wilderness Trauma Kit (Bandages, Antiseptic, Whistle)',
-        description: 'Emergency kit with sterile gauze, compression bandage, blister moleskin & high-decibel whistle.',
+        title: 'Trauma & Wilderness Medical Kit',
+        description: 'Pressure bandages, antiseptic dressings, sam-splint, and high-frequency emergency whistle.',
         isPriority: true
       }
     ];
@@ -69,7 +70,7 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
       items.push({
         id: 'rainshell',
         category: 'Weather-Specific',
-        title: '3-Layer Waterproof Hardshell Jacket & Backpack Rain Cover',
+        title: '3-Layer Waterproof Hardshell Jacket + Pack Cover',
         description: `Precipitation modeled at ${weather.rainProbability}%. Hardshell jacket prevents clothing soaking & hypothermia.`,
         isPriority: true
       });
@@ -79,8 +80,8 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
       items.push({
         id: 'insulation',
         category: 'Weather-Specific',
-        title: 'Thermal Base Layer & Fleece/Down Jacket',
-        description: `Apparent temperature drops to ${weather.feelsLike}°C. High hypothermia hazard if wet without windproof insulation.`,
+        title: 'Thermal Grid Fleece & 800-Fill Goose Down Jacket',
+        description: `Apparent temperature drops to ${weather.feelsLike}°C. High hypothermia hazard if wind-exposed.`,
         isPriority: true
       });
     }
@@ -89,8 +90,8 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
       items.push({
         id: 'sunprotection',
         category: 'Weather-Specific',
-        title: 'High-SPF Sunscreen (50+), UV Sunglasses & Wide Brim Hat',
-        description: `UV index modeled at ${weather.uvIndex} with solar reflection at high elevation.`,
+        title: 'UPF 50+ Sun Hoody, UV400 Eyewear & Mineral Sunblock',
+        description: `UV index calculated at ${weather.uvIndex} with direct ridge reflection.`,
         isPriority: false
       });
     }
@@ -99,8 +100,8 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
       items.push({
         id: 'windprotection',
         category: 'Weather-Specific',
-        title: 'Wind-Blocking Outer Shell & Neck Buff',
-        description: `Peak ridge gusts of ${weather.windGust} km/h require windstopper fabric to prevent rapid convective heat loss.`,
+        title: 'Windstopper Softshell Barrier & Thermal Buff',
+        description: `Peak ridge gusts of ${weather.windGust} km/h require windstopper fabric to block convective freeze.`,
         isPriority: true
       });
     }
@@ -108,16 +109,16 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
     items.push({
       id: 'nutrition',
       category: 'Trail Sustenance',
-      title: 'High-Calorie Trail Rations (Nuts, Energy Bars & Dates)',
-      description: 'Minimum 1,200 - 1,800 kcal of quick-digest fuel for sustained elevation gain.',
+      title: 'Dense Energy Rations (1,500 kcal Trail Mix & Carbohydrate Gels)',
+      description: 'Sustained uphill elevation burn requires hourly glycogen replenishment.',
       isPriority: false
     });
 
     items.push({
       id: 'poles',
       category: 'Essentials',
-      title: 'Adjustable Trekking Poles',
-      description: 'Relieves up to 25% of knee joint impact during steep switchbacks and slippery descents.',
+      title: 'Carbon-Fiber Telescopic Trekking Poles',
+      description: 'Absorbs up to 25% of descent knee shock on steep descents.',
       isPriority: false
     });
 
@@ -126,6 +127,7 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
 
   const items = getMajorItems();
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<'All' | 'Essentials' | 'Weather-Specific' | 'Safety & Navigation'>('All');
 
   const toggleCheck = (id: string) => {
     setCheckedIds((prev) =>
@@ -133,62 +135,86 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
     );
   };
 
+  const filteredItems = selectedFilter === 'All' 
+    ? items 
+    : items.filter(item => item.category === selectedFilter);
+
   const progressPercent = Math.round((checkedIds.length / items.length) * 100);
 
   return (
-    <div className="bg-[#111714] border border-white/10 rounded-2xl p-5 sm:p-6 space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="bg-[#0F1420] border border-white/10 p-5 sm:p-6 space-y-5">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <Backpack className="w-4 h-4" />
+            <span className="w-2 h-2 bg-orange-500"></span>
+            <span className="font-mono text-[10px] tracking-widest uppercase text-orange-400 font-bold">
+              PACKING INTELLIGENCE
             </span>
-            <h3 className="text-xs sm:text-sm font-bold font-mono uppercase tracking-wider text-white">
-              Tactical Expedition Gear Manifest
-            </h3>
           </div>
-          <p className="text-xs text-white/50 mt-1">
-            Adaptive safety checklist engineered for <strong>{trailName}</strong> weather conditions.
+          <h3 className="font-display text-base sm:text-lg font-bold text-white tracking-tight mt-0.5">
+            Trail Manifest // {trailName}
+          </h3>
+          <p className="text-xs text-white/50">
+            Dynamically customized gear configuration reflecting current weather vectors.
           </p>
         </div>
 
-        {/* Readiness Meter */}
-        <div className="flex items-center gap-3 bg-white/[0.02] border border-white/10 px-3 py-1.5 rounded-xl">
+        {/* Progress & Reset */}
+        <div className="flex items-center gap-3 bg-[#141B2B] p-2 sm:px-3 border border-white/10">
           <div className="text-right">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-white/40">Readiness</div>
-            <div className="text-xs font-mono font-bold text-emerald-400">
-              {checkedIds.length} / {items.length} Checked
+            <div className="text-[9px] font-mono uppercase text-white/40">READINESS</div>
+            <div className="text-xs font-mono font-bold text-orange-400">
+              {checkedIds.length} / {items.length} ITEMS
             </div>
           </div>
-          <div className="w-16 h-2 bg-white/10 rounded-full overflow-hidden">
+          <div className="w-16 h-2 bg-white/10 overflow-hidden">
             <div
-              className="h-full bg-emerald-400 transition-all duration-300"
+              className="h-full bg-orange-500 transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
           <button
             onClick={() => setCheckedIds([])}
-            className="p-1 hover:bg-white/10 text-white/40 hover:text-white rounded-lg transition-colors cursor-pointer"
-            title="Reset Checklist"
+            className="p-1 hover:bg-white/10 text-white/40 hover:text-white transition-colors cursor-pointer"
+            title="Reset Pack Checklist"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {items.map((item) => {
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px] font-mono">
+        {(['All', 'Essentials', 'Weather-Specific', 'Safety & Navigation'] as const).map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setSelectedFilter(cat)}
+            className={`px-2.5 py-1 transition-all cursor-pointer ${
+              selectedFilter === cat
+                ? 'bg-orange-500 text-black font-bold'
+                : 'bg-white/5 text-white/60 hover:text-white border border-white/5'
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Checklist items */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
+        {filteredItems.map((item) => {
           const isDone = checkedIds.includes(item.id);
           return (
             <div
               key={item.id}
               onClick={() => toggleCheck(item.id)}
-              className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
+              className={`p-3.5 border transition-all cursor-pointer flex items-start gap-3 select-none ${
                 isDone
                   ? 'bg-emerald-500/[0.04] border-emerald-500/30'
                   : item.isPriority
-                  ? 'bg-white/[0.02] border-white/10 hover:border-amber-500/30'
-                  : 'bg-white/[0.01] border-white/5 hover:border-white/15'
+                  ? 'bg-[#141B2B] border-white/15 hover:border-orange-500/40'
+                  : 'bg-[#101522] border-white/5 hover:border-white/15'
               }`}
             >
               <div className="mt-0.5 shrink-0">
@@ -202,15 +228,15 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`text-xs font-bold ${
+                    className={`text-xs font-bold leading-snug ${
                       isDone ? 'line-through text-white/40' : 'text-white'
                     }`}
                   >
                     {item.title}
                   </span>
                   {item.isPriority && !isDone && (
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold uppercase">
-                      CRITICAL
+                    <span className="text-[8px] font-mono px-1.5 py-0.2 bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold uppercase shrink-0">
+                      VITAL
                     </span>
                   )}
                 </div>
