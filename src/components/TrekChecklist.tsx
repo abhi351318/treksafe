@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { WeatherData } from '../types';
 import {
   CheckSquare,
@@ -6,11 +6,6 @@ import {
   ShieldAlert,
   Backpack,
   Compass,
-  HeartPulse,
-  Sun,
-  CloudRain,
-  Wind,
-  Layers,
   RotateCcw,
   Sparkles
 } from 'lucide-react';
@@ -29,22 +24,19 @@ interface ChecklistItem {
 }
 
 export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName }) => {
-  // Weather-adaptive major requirements
   const isRainy = weather.rainProbability >= 40 || weather.rainAmount > 1.0;
   const isCold = weather.feelsLike < 12;
   const isHot = weather.feelsLike > 26;
   const isHighWind = weather.windSpeed > 30 || weather.windGust > 40;
-  const isStormRisk = weather.thunderstormProbability > 25;
 
   const getMajorItems = (): ChecklistItem[] => {
     const items: ChecklistItem[] = [
-      // 1. Core Essentials (Must have for all mountain treks)
       {
         id: 'water',
         category: 'Trail Sustenance',
         title: isHot ? 'Hydration (3.0L Water + Electrolytes)' : 'Hydration Reservoir (2.0L - 2.5L Water)',
         description: isHot
-          ? 'High temperatures require oral rehydration salts & min 3 liters of water.'
+          ? 'High temperatures require oral rehydration salts & minimum 3 liters of water.'
           : 'Essential hydration bladder or insulated flasks for sustained summit push.',
         isPriority: true
       },
@@ -58,34 +50,27 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
         isPriority: true
       },
       {
-        id: 'navigation',
+        id: 'nav',
         category: 'Safety & Navigation',
-        title: 'Offline Trail Map & Backup Power Bank',
-        description: 'Downloaded offline topo maps + 10,000mAh battery pack for phone navigation.',
+        title: 'Offline GPS Track / Downloaded Map & Powerbank',
+        description: 'Dense canopy & mountain valleys lose cellular coverage. Keep backup offline GPX trailway.',
         isPriority: true
       },
       {
         id: 'firstaid',
         category: 'Safety & Navigation',
-        title: 'Compact Trail First-Aid & Blister Kit',
-        description: 'Bandages, antiseptic wipes, blister moleskin, elastic crepe wrap, and personal meds.',
+        title: 'Wilderness Trauma Kit (Bandages, Antiseptic, Whistle)',
+        description: 'Emergency kit with sterile gauze, compression bandage, blister moleskin & high-decibel whistle.',
         isPriority: true
-      },
-      {
-        id: 'headlamp',
-        category: 'Safety & Navigation',
-        title: 'Headlamp with Spare Batteries',
-        description: 'Hands-free 250+ lumen illumination in case trail descent stretches past sunset.'
       }
     ];
 
-    // 2. Weather-Condition Adaptive Essentials
-    if (isRainy || isStormRisk) {
+    if (isRainy) {
       items.push({
-        id: 'raingear',
+        id: 'rainshell',
         category: 'Weather-Specific',
-        title: 'Waterproof Hardshell Jacket & Backpack Rain Cover',
-        description: `${weather.rainProbability}% rain forecast (${weather.rainAmount}mm). Keep core and spare dry clothes sealed in dry bags.`,
+        title: '3-Layer Waterproof Hardshell Jacket & Backpack Rain Cover',
+        description: `Precipitation modeled at ${weather.rainProbability}%. Hardshell jacket prevents clothing soaking & hypothermia.`,
         isPriority: true
       });
     }
@@ -120,7 +105,6 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
       });
     }
 
-    // 3. High Energy Trail Snacks
     items.push({
       id: 'nutrition',
       category: 'Trail Sustenance',
@@ -129,7 +113,6 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
       isPriority: false
     });
 
-    // 4. Trekking poles (strongly recommended for elevation)
     items.push({
       id: 'poles',
       category: 'Essentials',
@@ -141,127 +124,97 @@ export const TrekChecklist: React.FC<TrekChecklistProps> = ({ weather, trailName
     return items;
   };
 
-  const [checklist, setChecklist] = useState<ChecklistItem[]>(getMajorItems());
-  const [checkedIds, setCheckedIds] = useState<Record<string, boolean>>(() => {
-    try {
-      const saved = localStorage.getItem('treksafe_checklist_state');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-
-  // Re-evaluate list whenever weather conditions change
-  useEffect(() => {
-    setChecklist(getMajorItems());
-  }, [weather.rainProbability, weather.feelsLike, weather.windGust, weather.uvIndex]);
+  const items = getMajorItems();
+  const [checkedIds, setCheckedIds] = useState<string[]>([]);
 
   const toggleCheck = (id: string) => {
-    const updated = { ...checkedIds, [id]: !checkedIds[id] };
-    setCheckedIds(updated);
-    try {
-      localStorage.setItem('treksafe_checklist_state', JSON.stringify(updated));
-    } catch (e) {
-      console.warn('Checklist save error:', e);
-    }
+    setCheckedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
   };
 
-  const handleResetChecklist = () => {
-    setCheckedIds({});
-    try {
-      localStorage.removeItem('treksafe_checklist_state');
-    } catch (e) {
-      console.warn('Checklist reset error:', e);
-    }
-  };
-
-  const totalItems = checklist.length;
-  const packedItems = checklist.filter((item) => checkedIds[item.id]).length;
-  const progressPercent = Math.round((packedItems / totalItems) * 100);
+  const progressPercent = Math.round((checkedIds.length / items.length) * 100);
 
   return (
-    <div className="bg-white border border-[#E4E0D2] rounded-2xl p-5 sm:p-6 shadow-xs space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E4E0D2] pb-4">
-        <div className="space-y-1">
+    <div className="bg-[#111714] border border-white/10 rounded-2xl p-5 sm:p-6 space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+        <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-[#243B2A] flex items-center gap-2">
-              <Backpack className="w-4 h-4 text-[#D7A84A]" />
-              Major Trek Checklist & Gear Essentials
-            </h3>
-            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#FAF8F3] border border-[#D5D0C0] text-[#526B4F]">
-              {packedItems} / {totalItems} Packed
+            <span className="p-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <Backpack className="w-4 h-4" />
             </span>
+            <h3 className="text-xs sm:text-sm font-bold font-mono uppercase tracking-wider text-white">
+              Tactical Expedition Gear Manifest
+            </h3>
           </div>
-          <p className="text-xs text-[#526B4F]">
-            Strictly essential requirements curated for <strong>{trailName}</strong> based on live weather hazards.
+          <p className="text-xs text-white/50 mt-1">
+            Adaptive safety checklist engineered for <strong>{trailName}</strong> weather conditions.
           </p>
         </div>
 
-        {/* Progress Bar & Reset */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-32 bg-[#E8E4D8] h-2.5 rounded-full overflow-hidden">
+        {/* Readiness Meter */}
+        <div className="flex items-center gap-3 bg-white/[0.02] border border-white/10 px-3 py-1.5 rounded-xl">
+          <div className="text-right">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-white/40">Readiness</div>
+            <div className="text-xs font-mono font-bold text-emerald-400">
+              {checkedIds.length} / {items.length} Checked
+            </div>
+          </div>
+          <div className="w-16 h-2 bg-white/10 rounded-full overflow-hidden">
             <div
-              className={`h-full transition-all duration-300 ${
-                progressPercent === 100 ? 'bg-emerald-600' : 'bg-[#243B2A]'
-              }`}
+              className="h-full bg-emerald-400 transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <span className="text-xs font-mono font-bold text-[#1F2520] min-w-[36px]">
-            {progressPercent}%
-          </span>
           <button
-            onClick={handleResetChecklist}
-            className="text-xs text-[#6B7262] hover:text-[#1F2520] flex items-center gap-1 font-medium cursor-pointer"
-            title="Reset checks"
+            onClick={() => setCheckedIds([])}
+            className="p-1 hover:bg-white/10 text-white/40 hover:text-white rounded-lg transition-colors cursor-pointer"
+            title="Reset Checklist"
           >
-            <RotateCcw className="w-3 h-3" />
+            <RotateCcw className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Grid of Checklist Items */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {checklist.map((item) => {
-          const isChecked = Boolean(checkedIds[item.id]);
-
+        {items.map((item) => {
+          const isDone = checkedIds.includes(item.id);
           return (
             <div
               key={item.id}
               onClick={() => toggleCheck(item.id)}
-              className={`p-3.5 rounded-xl border transition-all cursor-pointer select-none flex items-start gap-3 ${
-                isChecked
-                  ? 'bg-emerald-50/50 border-emerald-300'
+              className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
+                isDone
+                  ? 'bg-emerald-500/[0.04] border-emerald-500/30'
                   : item.isPriority
-                  ? 'bg-[#FAF8F3]/80 border-[#D5D0C0] hover:border-[#243B2A]'
-                  : 'bg-white border-[#EAE6D8] hover:border-[#D5D0C0]'
+                  ? 'bg-white/[0.02] border-white/10 hover:border-amber-500/30'
+                  : 'bg-white/[0.01] border-white/5 hover:border-white/15'
               }`}
             >
-              <div className="pt-0.5 shrink-0 text-[#243B2A]">
-                {isChecked ? (
-                  <CheckSquare className="w-5 h-5 text-emerald-700" />
+              <div className="mt-0.5 shrink-0">
+                {isDone ? (
+                  <CheckSquare className="w-4 h-4 text-emerald-400" />
                 ) : (
-                  <Square className="w-5 h-5 text-[#8C8675]" />
+                  <Square className="w-4 h-4 text-white/40" />
                 )}
               </div>
 
-              <div className="min-w-0 flex-1 space-y-0.5">
-                <div className="flex items-center justify-between gap-2">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
                   <span
-                    className={`text-xs font-bold leading-tight ${
-                      isChecked ? 'line-through text-[#6B7262]' : 'text-[#1F2520]'
+                    className={`text-xs font-bold ${
+                      isDone ? 'line-through text-white/40' : 'text-white'
                     }`}
                   >
                     {item.title}
                   </span>
-                  {item.isPriority && !isChecked && (
-                    <span className="text-[10px] uppercase font-bold text-amber-900 bg-amber-100/90 px-1.5 py-0.5 rounded-sm shrink-0">
-                      Essential
+                  {item.isPriority && !isDone && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold uppercase">
+                      CRITICAL
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-[#526B4F] leading-relaxed">
+                <p className="text-[11px] text-white/50 leading-relaxed font-sans">
                   {item.description}
                 </p>
               </div>

@@ -2,9 +2,10 @@
 
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    background-color: #F5F3EC;
-    color: #1F2520;
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    background-color: #0B0F0D;
+    color: #E2E8E0;
+    overflow-x: hidden;
   }
   
   code, pre, .font-mono {
@@ -12,27 +13,42 @@
   }
 }
 
-/* Subtle Topographic pattern */
-.bg-topo {
-  background-color: #F5F3EC;
-  background-image: radial-gradient(#526B4F 0.75px, transparent 0.75px), radial-gradient(#243B2A 0.5px, #F5F3EC 0.5px);
-  background-size: 30px 30px;
-  background-position: 0 0, 15px 15px;
-  background-opacity: 0.05;
+/* Subtle tactical topographic grid lines */
+.bg-topo-dark {
+  background-color: #0B0F0D;
+  background-image: 
+    linear-gradient(to right, rgba(52, 211, 153, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(52, 211, 153, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.radar-sweep-bg {
+  background: radial-gradient(circle at 50% 0%, rgba(30, 58, 43, 0.45) 0%, rgba(11, 15, 13, 0.95) 75%);
+}
+
+/* Glass & tactical borders */
+.tactical-panel {
+  background: #111714;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.6);
+}
+
+.tactical-panel:hover {
+  border-color: rgba(52, 211, 153, 0.22);
 }
 
 /* Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #ECE8DC;
+  background: #0B0F0D;
 }
 ::-webkit-scrollbar-thumb {
-  background: #C4BFB0;
-  border-radius: 9999px;
+  background: #23332A;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #A09A88;
+  background: #34D399;
 }

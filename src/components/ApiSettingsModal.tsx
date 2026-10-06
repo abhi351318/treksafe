@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { getStoredMapsKey, setStoredMapsKey, DEFAULT_GOOGLE_MAPS_KEY } from '../services/googleMapsLoader';
-import { Key, Check, X, Shield, RefreshCw } from 'lucide-react';
+import { getStoredMapsKey, setStoredMapsKey } from '../services/googleMapsLoader';
+import { Key, X, CheckCircle, ShieldAlert, Sparkles, ExternalLink } from 'lucide-react';
 
 interface ApiSettingsModalProps {
   isOpen: boolean;
@@ -14,83 +14,70 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
   onKeyUpdated
 }) => {
   const [apiKey, setApiKey] = useState(getStoredMapsKey());
-  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [savedNotice, setSavedNotice] = useState(false);
 
   if (!isOpen) return null;
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     setStoredMapsKey(apiKey.trim());
-    setSavedSuccess(true);
+    setSavedNotice(true);
     onKeyUpdated();
     setTimeout(() => {
-      setSavedSuccess(false);
+      setSavedNotice(false);
       onClose();
-    }, 900);
-  };
-
-  const handleReset = () => {
-    setApiKey(DEFAULT_GOOGLE_MAPS_KEY);
-    setStoredMapsKey(DEFAULT_GOOGLE_MAPS_KEY);
-    onKeyUpdated();
+    }, 800);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/50 backdrop-blur-xs">
-      <div className="bg-white border border-[#E4E0D2] rounded-2xl w-full max-w-md flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md">
+      <div className="bg-[#111714] border border-white/10 rounded-2xl w-full max-w-md flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#E4E0D2] bg-[#FAF8F3] flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#243B2A] text-[#D7A84A] flex items-center justify-center">
+        <div className="px-6 py-4 border-b border-white/10 bg-[#151D18] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
               <Key className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-[#243B2A] uppercase tracking-wider">
+              <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
                 Google Maps API Configuration
               </h2>
-              <p className="text-xs text-[#526B4F]">
-                Active key & places autocomplete
+              <p className="text-[11px] text-white/50">
+                Configure custom key for production map rendering & places search
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg hover:bg-[#EAE6D8] text-[#526B4F] flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-lg hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <form onSubmit={handleSave} className="p-5 space-y-4">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#243B2A] mb-1.5">
-              Google Maps JavaScript API Key
+        <form onSubmit={handleSave} className="p-6 space-y-4">
+          {savedNotice && (
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-mono flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Key saved! Map instance reloading...</span>
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <label className="block text-[11px] font-mono uppercase tracking-wider text-white/60">
+              Maps API Key
             </label>
             <input
               type="text"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="AIzaSy..."
-              className="w-full px-3.5 py-2.5 bg-white border border-[#D5D0C0] focus:border-[#243B2A] rounded-xl text-xs font-mono text-[#1F2520] outline-hidden"
+              className="w-full px-3 py-2 bg-black/40 border border-white/10 focus:border-emerald-500 rounded-xl text-xs font-mono text-white outline-hidden"
             />
-            <div className="flex items-center justify-between mt-1.5 text-[11px] text-[#526B4F]">
-              <span>Active key provided</span>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="hover:text-[#243B2A] underline cursor-pointer"
-              >
-                Reset to default
-              </button>
-            </div>
-          </div>
-
-          <div className="p-3 rounded-xl bg-[#FAF8F3] border border-[#EAE6D8] text-xs text-[#526B4F] flex items-start gap-2">
-            <Shield className="w-4 h-4 text-[#D7A84A] shrink-0 mt-0.5" />
-            <p>
-              Your key powers the interactive terrain map, trailhead marker, and Google Places autocomplete search across global mountain trails.
+            <p className="text-[10px] font-mono text-white/40">
+              A built-in demo key is active by default. Enter your own key for higher quotas.
             </p>
           </div>
 
@@ -98,21 +85,15 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 text-xs font-semibold text-[#526B4F] hover:text-[#1F2520] cursor-pointer"
+              className="px-4 py-2 border border-white/10 text-white/60 hover:text-white rounded-xl text-xs font-mono cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-[#243B2A] hover:bg-[#1A2C1F] text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold rounded-xl text-xs cursor-pointer transition-colors shadow-xs"
             >
-              {savedSuccess ? (
-                <>
-                  <Check className="w-3.5 h-3.5" /> Saved
-                </>
-              ) : (
-                'Save Key'
-              )}
+              Save Configuration
             </button>
           </div>
         </form>

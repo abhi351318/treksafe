@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { loadGoogleMaps } from '../services/googleMapsLoader';
 import { TrekLocation } from '../types';
-import { MapPin, Mountain, Flag, Compass, Route, Layers } from 'lucide-react';
+import { MapPin, Mountain, Flag, Compass, Route, Layers, Maximize2 } from 'lucide-react';
 
 interface MapViewProps {
   trek: TrekLocation;
@@ -42,7 +42,6 @@ export const MapView: React.FC<MapViewProps> = ({ trek, riskScore }) => {
             ? trek.pathway
             : [startCoords, endCoords];
 
-        // Bounds to frame entire trail path with padding
         const bounds = new googleMaps.maps.LatLngBounds();
         pathwayCoords.forEach((p) => bounds.extend(p));
 
@@ -58,124 +57,66 @@ export const MapView: React.FC<MapViewProps> = ({ trek, riskScore }) => {
             fullscreenControl: true
           });
 
-          // 1. Starting Point Marker (Trailhead - Emerald Green Pin)
-          const startMarker = new googleMaps.maps.Marker({
-            position: startCoords,
-            map,
-            title: trek.startPoint ? `Start: ${trek.startPoint.name}` : `${trek.name} Trailhead`,
-            label: {
-              text: 'S',
-              color: '#FFFFFF',
-              fontWeight: 'bold',
-              fontSize: '11px'
-            },
-            icon: {
-              path: googleMaps.maps.SymbolPath.CIRCLE,
-              scale: 10,
-              fillColor: '#16A34A', // Green
-              fillOpacity: 1,
-              strokeColor: '#FFFFFF',
-              strokeWeight: 2.5
-            }
-          });
-
-          // 2. Ending Point Marker (Summit - Red / Gold Flag Marker)
-          const endMarker = new googleMaps.maps.Marker({
-            position: endCoords,
-            map,
-            title: trek.endPoint ? `Summit: ${trek.endPoint.name}` : `${trek.name} Summit`,
-            label: {
-              text: 'E',
-              color: '#FFFFFF',
-              fontWeight: 'bold',
-              fontSize: '11px'
-            },
-            icon: {
-              path: googleMaps.maps.SymbolPath.CIRCLE,
-              scale: 11,
-              fillColor: '#DC2626', // Red
-              fillOpacity: 1,
-              strokeColor: '#FFFFFF',
-              strokeWeight: 2.5
-            }
-          });
-
-          // 3. Pathway Polyline Line describing the trail route
-          const polylineColor = riskScore > 60 ? '#DC2626' : riskScore > 40 ? '#D97706' : '#243B2A';
-          const polyline = new googleMaps.maps.Polyline({
-            path: pathwayCoords,
-            geodesic: true,
-            strokeColor: polylineColor,
-            strokeOpacity: 0.88,
-            strokeWeight: 4.5,
-            map
-          });
-
-          // 4. Perimeter safety buffer around the summit
-          const circle = new googleMaps.maps.Circle({
-            map,
-            center: endCoords,
-            radius: 2000,
-            fillColor: polylineColor,
-            fillOpacity: 0.08,
-            strokeColor: polylineColor,
-            strokeOpacity: 0.35,
-            strokeWeight: 1.5
-          });
-
-          // Info Windows
-          const startInfoWindow = new googleMaps.maps.InfoWindow({
-            content: `
-              <div style="font-family: inherit; padding: 6px; font-size: 12px; color: #1F2520;">
-                <strong style="color: #16A34A; display: block; font-size: 13px;">Trailhead Start Point</strong>
-                <span style="font-weight: 600;">${trek.startPoint?.name || 'Base Entrance'}</span>
-                <div style="color: #526B4F; margin-top: 2px;">Elevation: ${trek.startPoint?.elevation || 'Base'}m</div>
-              </div>
-            `
-          });
-
-          const endInfoWindow = new googleMaps.maps.InfoWindow({
-            content: `
-              <div style="font-family: inherit; padding: 6px; font-size: 12px; color: #1F2520;">
-                <strong style="color: #DC2626; display: block; font-size: 13px;">Trail Destination / Summit</strong>
-                <span style="font-weight: 600;">${trek.endPoint?.name || trek.name}</span>
-                <div style="color: #526B4F; margin-top: 2px;">Summit: ${trek.elevation || 1500}m</div>
-                <div style="margin-top: 4px; font-weight: bold; color: ${riskScore > 60 ? '#b91c1c' : '#15803d'};">
-                  Risk Score: ${riskScore}/100
-                </div>
-              </div>
-            `
-          });
-
-          startMarker.addListener('click', () => startInfoWindow.open(map, startMarker));
-          endMarker.addListener('click', () => endInfoWindow.open(map, endMarker));
-
-          map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
-
           mapInstanceRef.current = map;
-          startMarkerRef.current = startMarker;
-          endMarkerRef.current = endMarker;
-          pathwayPolylineRef.current = polyline;
-          circleRef.current = circle;
         } else {
-          // Update existing markers, pathway line, and camera bounds
-          const map = mapInstanceRef.current;
-          startMarkerRef.current?.setPosition(startCoords);
-          endMarkerRef.current?.setPosition(endCoords);
-
-          const polylineColor = riskScore > 60 ? '#DC2626' : riskScore > 40 ? '#D97706' : '#243B2A';
-          pathwayPolylineRef.current?.setPath(pathwayCoords);
-          pathwayPolylineRef.current?.setOptions({ strokeColor: polylineColor });
-
-          circleRef.current?.setCenter(endCoords);
-          circleRef.current?.setOptions({ fillColor: polylineColor, strokeColor: polylineColor });
-
-          map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
+          mapInstanceRef.current.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
         }
+
+        const map = mapInstanceRef.current;
+
+        // Clear existing markers & paths
+        if (startMarkerRef.current) startMarkerRef.current.setMap(null);
+        if (endMarkerRef.current) endMarkerRef.current.setMap(null);
+        if (pathwayPolylineRef.current) pathwayPolylineRef.current.setMap(null);
+        if (circleRef.current) circleRef.current.setMap(null);
+
+        // Render Start Marker
+        startMarkerRef.current = new googleMaps.maps.Marker({
+          position: startCoords,
+          map,
+          title: `Start: ${trek.startPoint?.name || 'Trailhead'}`,
+          icon: {
+            path: googleMaps.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: '#10B981',
+            fillOpacity: 1,
+            strokeColor: '#FFFFFF',
+            strokeWeight: 2.5
+          }
+        });
+
+        // Render Summit Marker
+        endMarkerRef.current = new googleMaps.maps.Marker({
+          position: endCoords,
+          map,
+          title: `Summit: ${trek.endPoint?.name || trek.name}`,
+          icon: {
+            path: googleMaps.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+            scale: 6,
+            fillColor: '#EF4444',
+            fillOpacity: 1,
+            strokeColor: '#FFFFFF',
+            strokeWeight: 2
+          }
+        });
+
+        // Dynamic trail glow based on risk score
+        const pathStrokeColor = riskScore > 65 ? '#EF4444' : riskScore > 40 ? '#F59E0B' : '#10B981';
+
+        // Render Pathway Polyline
+        pathwayPolylineRef.current = new googleMaps.maps.Polyline({
+          path: pathwayCoords,
+          geodesic: true,
+          strokeColor: pathStrokeColor,
+          strokeOpacity: 0.9,
+          strokeWeight: 5,
+          map
+        });
+
+        map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
       } catch (err: any) {
-        console.warn('Google Map loading notice:', err);
         if (isMounted) {
-          setLoadError(err.message || 'Could not load Google Maps');
+          setLoadError(err.message || 'Google Maps service unavailable');
         }
       }
     }
@@ -185,112 +126,98 @@ export const MapView: React.FC<MapViewProps> = ({ trek, riskScore }) => {
     return () => {
       isMounted = false;
     };
-  }, [trek.latitude, trek.longitude, trek.name, trek.elevation, trek.startPoint, trek.endPoint, trek.pathway, riskScore]);
+  }, [trek, riskScore]);
 
-  const handleMapTypeChange = (type: 'terrain' | 'satellite' | 'roadmap') => {
+  const switchMapType = (type: 'terrain' | 'satellite' | 'roadmap') => {
     setMapType(type);
-    if (mapInstanceRef.current && window.google?.maps) {
-      const typeMap = {
-        terrain: window.google.maps.MapTypeId.TERRAIN,
-        satellite: window.google.maps.MapTypeId.HYBRID,
-        roadmap: window.google.maps.MapTypeId.ROADMAP
-      };
-      mapInstanceRef.current.setMapTypeId(typeMap[type]);
+    if (!mapInstanceRef.current) return;
+    const gmaps = (window as any).google?.maps;
+    if (!gmaps) return;
+
+    if (type === 'satellite') {
+      mapInstanceRef.current.setMapTypeId(gmaps.MapTypeId.HYBRID);
+    } else if (type === 'roadmap') {
+      mapInstanceRef.current.setMapTypeId(gmaps.MapTypeId.ROADMAP);
+    } else {
+      mapInstanceRef.current.setMapTypeId(gmaps.MapTypeId.TERRAIN);
     }
   };
 
   return (
-    <div className="bg-white border border-[#E4E0D2] rounded-2xl overflow-hidden shadow-xs relative">
-      {/* Top Map Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 bg-[#FAF8F3] border-b border-[#E4E0D2]">
+    <div className="bg-[#111714] border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col h-full min-h-[380px] sm:min-h-[440px]">
+      {/* Top Map Header / Layer Toggles */}
+      <div className="px-4 py-3 bg-[#151D18] border-b border-white/10 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-[#243B2A]/10 text-[#243B2A] flex items-center justify-center">
-            <Route className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-xs font-bold text-[#243B2A] uppercase tracking-wider">
-                Geospatial Trail Route & Pathway
-              </h3>
-              {trek.trailLengthKm && (
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white border border-[#D5D0C0] text-[#526B4F]">
-                  {trek.trailLengthKm} km route
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-[#526B4F] truncate max-w-xs sm:max-w-md">
-              {trek.startPoint?.name || 'Trailhead'} → {trek.endPoint?.name || trek.name}
-            </p>
-          </div>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
+            <Route className="w-3.5 h-3.5 text-emerald-400" />
+            Topographic Trailway Vector
+          </h3>
         </div>
 
-        {/* Map Type Controls */}
-        <div className="flex items-center bg-[#EBE7DC] p-0.5 rounded-lg text-xs font-medium">
+        {/* Layer Selectors */}
+        <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/10 text-[10px] font-mono">
           <button
-            onClick={() => handleMapTypeChange('terrain')}
-            className={`px-2.5 py-1 rounded-md transition-all ${
+            type="button"
+            onClick={() => switchMapType('terrain')}
+            className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
               mapType === 'terrain'
-                ? 'bg-white text-[#243B2A] font-semibold shadow-xs'
-                : 'text-[#526B4F] hover:text-[#1F2520]'
+                ? 'bg-emerald-500 text-black font-bold'
+                : 'text-white/60 hover:text-white'
             }`}
           >
             Terrain
           </button>
           <button
-            onClick={() => handleMapTypeChange('satellite')}
-            className={`px-2.5 py-1 rounded-md transition-all ${
+            type="button"
+            onClick={() => switchMapType('satellite')}
+            className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
               mapType === 'satellite'
-                ? 'bg-white text-[#243B2A] font-semibold shadow-xs'
-                : 'text-[#526B4F] hover:text-[#1F2520]'
+                ? 'bg-emerald-500 text-black font-bold'
+                : 'text-white/60 hover:text-white'
             }`}
           >
             Satellite
           </button>
           <button
-            onClick={() => handleMapTypeChange('roadmap')}
-            className={`px-2.5 py-1 rounded-md transition-all ${
+            type="button"
+            onClick={() => switchMapType('roadmap')}
+            className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
               mapType === 'roadmap'
-                ? 'bg-white text-[#243B2A] font-semibold shadow-xs'
-                : 'text-[#526B4F] hover:text-[#1F2520]'
+                ? 'bg-emerald-500 text-black font-bold'
+                : 'text-white/60 hover:text-white'
             }`}
           >
-            Roads
+            Roadmap
           </button>
         </div>
       </div>
 
-      {/* Map Viewport Canvas */}
-      <div className="relative w-full h-[340px] sm:h-[400px] bg-[#E8E4D8]">
-        <div ref={mapContainerRef} className="w-full h-full" />
+      {/* Map View Canvas */}
+      <div className="relative flex-1 w-full bg-[#0B0F0D]">
+        <div ref={mapContainerRef} className="w-full h-full min-h-[360px]" />
 
-        {/* Fallback View */}
         {loadError && (
-          <div className="absolute inset-0 bg-[#F4F1E6] flex flex-col items-center justify-center p-6 text-center z-10">
-            <Compass className="w-8 h-8 text-[#D7A84A] mb-2 animate-pulse" />
-            <h4 className="text-sm font-bold text-[#243B2A] mb-1">
-              {trek.name} Trail Route
-            </h4>
-            <p className="text-xs text-[#526B4F] max-w-sm mb-3">
-              Start: {trek.startPoint?.name || 'Base'} • End: {trek.endPoint?.name || 'Summit'}
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center text-white space-y-2">
+            <Mountain className="w-10 h-10 text-emerald-400/80 mb-1" />
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">
+              Interactive Topo Map Standby
+            </span>
+            <p className="text-xs text-white/60 max-w-sm">
+              Coordinates: {trek.latitude.toFixed(4)}° N, {trek.longitude.toFixed(4)}° E. Check Google Maps API Key in configuration.
             </p>
           </div>
         )}
 
-        {/* Interactive Pathway Legend Overlay */}
-        <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-xs border border-[#E4E0D2] rounded-xl px-3 py-2 shadow-xs flex flex-wrap items-center gap-3 z-10 text-xs">
-          <div className="flex items-center gap-1.5 font-bold text-[#1F2520]">
-            <span className="w-3 h-3 rounded-full bg-[#16A34A] text-[9px] text-white flex items-center justify-center">S</span>
-            <span>Start: {trek.startPoint?.name || 'Trailhead'}</span>
+        {/* Trailway Elevation Overlay Strip */}
+        <div className="absolute bottom-3 left-3 right-3 bg-black/75 backdrop-blur-md border border-white/10 rounded-xl p-2.5 flex items-center justify-between text-[11px] font-mono text-white/80">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span>Trailhead: {trek.startPoint?.name || 'Base Camp'}</span>
           </div>
-          <div className="h-3 w-px bg-[#E4E0D2]"></div>
-          <div className="flex items-center gap-1.5 font-bold text-[#1F2520]">
-            <span className="w-3 h-3 rounded-full bg-[#DC2626] text-[9px] text-white flex items-center justify-center">E</span>
-            <span>End: {trek.endPoint?.name || 'Summit'}</span>
-          </div>
-          <div className="h-3 w-px bg-[#E4E0D2]"></div>
-          <div className="flex items-center gap-1.5 font-medium text-[#526B4F]">
-            <span className="w-4 h-1 bg-[#243B2A] rounded-full inline-block"></span>
-            <span>Pathway Line</span>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+            <span>Summit: {trek.endPoint?.name || trek.name} ({trek.elevation}m)</span>
           </div>
         </div>
       </div>

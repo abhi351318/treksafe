@@ -12,7 +12,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   onSelectDate,
   disabled
 }) => {
-  // Generate 10 consecutive forecast days starting today
   const today = new Date();
   const availableDays: Array<{
     dateStr: string;
@@ -45,12 +44,13 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   }
 
   return (
-    <div className="w-full space-y-2.5">
+    <div className="w-full space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-bold uppercase tracking-wider text-[#243B2A] flex items-center gap-1.5">
-          <CalendarIcon className="w-3.5 h-3.5 text-[#526B4F]" /> Trek Date
+        <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-white/70 flex items-center gap-1.5">
+          <CalendarIcon className="w-3.5 h-3.5 text-emerald-400" />
+          Expedition Date Window
         </label>
-        <span className="text-[11px] text-[#526B4F]">10-day forecast window</span>
+        <span className="text-[10px] font-mono text-white/40">10-Day Synoptic Horizon</span>
       </div>
 
       {/* Horizontal Scroll Date Picker */}
@@ -64,33 +64,21 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               type="button"
               disabled={disabled}
               onClick={() => onSelectDate(item.dateStr)}
-              className={`flex-1 min-w-[70px] max-w-[85px] py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+              className={`flex-1 min-w-[72px] sm:min-w-[80px] py-2 px-2.5 rounded-xl border text-center transition-all cursor-pointer select-none ${
                 isSelected
-                  ? 'bg-[#243B2A] text-white border-[#243B2A] shadow-xs'
-                  : 'bg-white text-[#1F2520] border-[#DCD7C6] hover:border-[#243B2A]/60 hover:bg-[#FAF8F3]'
+                  ? 'bg-emerald-500 text-black border-emerald-400 font-bold shadow-[0_0_15px_rgba(52,211,153,0.3)]'
+                  : 'bg-white/[0.02] border-white/10 hover:border-white/20 text-white/70 hover:text-white'
               }`}
             >
-              <span
-                className={`text-[10px] font-bold uppercase tracking-wider ${
-                  isSelected ? 'text-[#D7A84A]' : 'text-[#6B7262]'
-                }`}
-              >
+              <div className="text-[10px] font-mono uppercase tracking-wider">
                 {item.dayName}
-              </span>
-              <span
-                className={`text-base font-extrabold leading-tight ${
-                  isSelected ? 'text-white' : 'text-[#1F2520]'
-                }`}
-              >
+              </div>
+              <div className="text-sm sm:text-base font-mono font-extrabold my-0.5">
                 {item.dayNum}
-              </span>
-              <span
-                className={`text-[10px] ${
-                  isSelected ? 'text-white/80' : 'text-[#6B7262]'
-                }`}
-              >
+              </div>
+              <div className="text-[9px] font-mono opacity-60">
                 {item.monthName}
-              </span>
+              </div>
             </button>
           );
         })}
