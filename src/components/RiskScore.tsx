@@ -1,16 +1,6 @@
 import React from 'react';
 import { RiskPrediction } from '../types';
-import {
-  ShieldAlert,
-  Flame,
-  AlertTriangle,
-  CheckCircle,
-  TrendingUp,
-  Activity,
-  Compass,
-  Zap,
-  Target
-} from 'lucide-react';
+import { CheckCircle, AlertTriangle, ShieldAlert, Compass } from 'lucide-react';
 
 interface RiskScoreProps {
   risk: RiskPrediction;
@@ -23,139 +13,134 @@ export const RiskScore: React.FC<RiskScoreProps> = ({ risk }) => {
     switch (band) {
       case 'VERY_LOW':
         return {
-          barColor: 'bg-emerald-500',
-          textColor: 'text-emerald-400',
-          borderColor: 'border-emerald-500/30',
-          bgGlow: 'bg-emerald-500/10',
-          tierLabel: 'STAGE I: OPTIMAL CLIMB WINDOW',
-          badgeText: 'FAVORABLE'
+          stroke: '#2E5A36',
+          badgeBg: 'bg-[#EBF3EC]',
+          badgeText: 'text-[#2E5A36]',
+          border: 'border-[#C5DEC9]',
+          label: bandLabel || 'Very Low Risk',
+          icon: <CheckCircle className="w-4 h-4 text-[#2E5A36]" />
         };
       case 'LOW':
         return {
-          barColor: 'bg-cyan-500',
-          textColor: 'text-cyan-400',
-          borderColor: 'border-cyan-500/30',
-          bgGlow: 'bg-cyan-500/10',
-          tierLabel: 'STAGE II: REGULAR EXPEDITION',
-          badgeText: 'MILD EXPOSURE'
+          stroke: '#526B4F',
+          badgeBg: 'bg-[#EEF3EE]',
+          badgeText: 'text-[#243B2A]',
+          border: 'border-[#D1DDD0]',
+          label: bandLabel || 'Low Risk',
+          icon: <CheckCircle className="w-4 h-4 text-[#526B4F]" />
         };
       case 'MODERATE':
         return {
-          barColor: 'bg-amber-500',
-          textColor: 'text-amber-400',
-          borderColor: 'border-amber-500/40',
-          bgGlow: 'bg-amber-500/10',
-          tierLabel: 'STAGE III: CAUTION ADVISORY',
-          badgeText: 'MODERATE EXPOSURE'
+          stroke: '#D7A84A',
+          badgeBg: 'bg-[#FDF8E8]',
+          badgeText: 'text-[#8C6414]',
+          border: 'border-[#EEDCA8]',
+          label: bandLabel || 'Moderate Risk',
+          icon: <AlertTriangle className="w-4 h-4 text-[#C28F2D]" />
         };
       case 'HIGH':
         return {
-          barColor: 'bg-orange-500',
-          textColor: 'text-orange-400',
-          borderColor: 'border-orange-500/40',
-          bgGlow: 'bg-orange-500/10',
-          tierLabel: 'STAGE IV: SEVERE WEATHER RISKS',
-          badgeText: 'HIGH DANGER'
+          stroke: '#C85A32',
+          badgeBg: 'bg-[#FCEEE8]',
+          badgeText: 'text-[#A0411E]',
+          border: 'border-[#F2C9B9]',
+          label: bandLabel || 'High Risk',
+          icon: <AlertTriangle className="w-4 h-4 text-[#C85A32]" />
         };
       case 'VERY_HIGH':
       default:
         return {
-          barColor: 'bg-rose-500',
-          textColor: 'text-rose-400',
-          borderColor: 'border-rose-500/50',
-          bgGlow: 'bg-rose-500/15',
-          tierLabel: 'STAGE V: CRITICAL STORM / ABORT',
-          badgeText: 'CRITICAL HAZARD'
+          stroke: '#991B1B',
+          badgeBg: 'bg-[#FDECEC]',
+          badgeText: 'text-[#991B1B]',
+          border: 'border-[#F5C2C2]',
+          label: bandLabel || 'Very High Risk',
+          icon: <ShieldAlert className="w-4 h-4 text-[#991B1B]" />
         };
     }
   };
 
   const theme = getTheme();
-
-  // 10 segmented LED-style bars
-  const totalSegments = 10;
-  const activeSegments = Math.round((score / 100) * totalSegments);
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius;
+  const clampedScore = Math.max(0, Math.min(100, score));
+  const strokeDashoffset = circumference - (clampedScore / 100) * circumference;
 
   return (
-    <div className={`relative bg-[#0F1420] border ${theme.borderColor} p-6 sm:p-7 shadow-2xl`}>
-      {/* Top technical kicker */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4 mb-5">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-orange-500 animate-pulse"></span>
-          <span className="font-mono text-[10px] tracking-widest uppercase text-white/50">
-            SYSTEM // TRAIL TELEMETRY ENGINE
-          </span>
-        </div>
-        <div className="font-mono text-[11px] text-white/60 flex items-center gap-3">
-          <span>MODEL CONFIDENCE: 94.2%</span>
-          <span>•</span>
-          <span className={theme.textColor}>{theme.tierLabel}</span>
-        </div>
-      </div>
-
+    <div className="bg-white border border-[#E4E0D2] rounded-2xl p-5 sm:p-6 shadow-xs">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-        
-        {/* Left: Giant Monospace Score Readout & Segmented Gauge */}
-        <div className="lg:col-span-5 flex flex-col space-y-4">
-          <div className="flex items-baseline gap-4">
-            <div className="font-mono text-6xl sm:text-7xl font-black tracking-tighter text-white">
-              {score}
-            </div>
-            <div className="space-y-1">
-              <span className="font-mono text-xs uppercase tracking-widest text-white/40 block">
-                RISK INDEX
+        {/* Left: Circular Earth-Tone Risk Gauge */}
+        <div className="lg:col-span-4 flex items-center gap-5">
+          <div className="relative w-32 h-32 shrink-0 flex items-center justify-center">
+            <svg className="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
+              <circle
+                cx="60"
+                cy="60"
+                r={radius}
+                fill="none"
+                stroke="#EAE6D8"
+                strokeWidth="10"
+              />
+              <circle
+                cx="60"
+                cy="60"
+                r={radius}
+                fill="none"
+                stroke={theme.stroke}
+                strokeWidth="10"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                className="transition-all duration-500"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-3xl font-extrabold text-[#1F2520] tabular-nums">
+                {score}
               </span>
-              <span className={`inline-block font-mono text-xs font-bold px-2 py-0.5 uppercase ${theme.bgGlow} ${theme.textColor} border ${theme.borderColor}`}>
-                {theme.badgeText}
-              </span>
+              <span className="text-[11px] font-medium text-[#6B7262]">of 100</span>
             </div>
           </div>
 
-          {/* Segmented LED Bar Indicator */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-[9px] font-mono text-white/40 uppercase">
-              <span>0% LOW HAZARD</span>
-              <span>100% EXTREME HAZARD</span>
+          <div className="space-y-2">
+            <div className="text-xs font-semibold uppercase tracking-wider text-[#6B7262]">
+              Weather Risk Index
             </div>
-            <div className="grid grid-cols-10 gap-1.5 h-3">
-              {Array.from({ length: totalSegments }).map((_, i) => {
-                const isActive = i < activeSegments;
-                return (
-                  <div
-                    key={i}
-                    className={`h-full transition-all duration-300 ${
-                      isActive
-                        ? theme.barColor
-                        : 'bg-white/5 border border-white/5'
-                    }`}
-                  />
-                );
-              })}
+            <div
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${theme.badgeBg} ${theme.badgeText} ${theme.border}`}
+            >
+              {theme.icon}
+              <span>{theme.label}</span>
             </div>
-          </div>
-        </div>
-
-        {/* Right: Technical Summary & Tactical Protocol */}
-        <div className="lg:col-span-7 space-y-4 lg:pl-4 lg:border-l lg:border-white/10">
-          <div>
-            <span className="text-[10px] font-mono uppercase tracking-widest text-orange-400 font-bold block mb-1">
-              EXPEDITION BRIEFING
-            </span>
-            <h3 className="font-display text-lg sm:text-xl font-bold text-white tracking-tight leading-snug">
-              {summary}
-            </h3>
-          </div>
-
-          <div className="bg-[#141B2B] border-l-2 border-orange-500 p-3.5 space-y-1 text-xs">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-orange-400 font-bold flex items-center gap-1.5">
-              <Target className="w-3.5 h-3.5" /> Mandatory Action Directive
-            </span>
-            <p className="text-white/80 leading-relaxed font-sans">
-              {actionRecommendation}
+            <p className="text-xs text-[#6B7262]">
+              Calibrated trail hazard score from precipitation, wind, storm & altitude exposure.
             </p>
           </div>
         </div>
 
+        {/* Right: Assessment Summary & Recommendation */}
+        <div className="lg:col-span-8 space-y-3 lg:border-l lg:border-[#EAE6D8] lg:pl-6">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-[#526B4F] mb-1">
+              Trail Safety Briefing
+            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-[#243B2A] leading-snug">
+              {summary}
+            </h3>
+          </div>
+
+          <div className="p-4 rounded-xl bg-[#FAF8F3] border border-[#E4E0D2] flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#243B2A] text-[#D7A84A] flex items-center justify-center shrink-0 mt-0.5">
+              <Compass className="w-4 h-4" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-xs font-bold text-[#243B2A]">Recommended Action</div>
+              <p className="text-xs sm:text-sm text-[#526B4F] leading-relaxed">
+                {actionRecommendation}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

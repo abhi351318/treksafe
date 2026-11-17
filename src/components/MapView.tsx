@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { loadGoogleMaps } from '../services/googleMapsLoader';
 import { TrekLocation } from '../types';
-import { Layers, Mountain, Route } from 'lucide-react';
+import { Mountain, MapPin } from 'lucide-react';
 
 interface MapViewProps {
   trek: TrekLocation;
@@ -74,9 +74,9 @@ export const MapView: React.FC<MapViewProps> = ({ trek, riskScore }) => {
           icon: {
             path: googleMaps.maps.SymbolPath.CIRCLE,
             scale: 7,
-            fillColor: '#F97316',
+            fillColor: '#10B981',
             fillOpacity: 1,
-            strokeColor: '#000000',
+            strokeColor: '#FFFFFF',
             strokeWeight: 2
           }
         });
@@ -88,20 +88,21 @@ export const MapView: React.FC<MapViewProps> = ({ trek, riskScore }) => {
           icon: {
             path: googleMaps.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
             scale: 6,
-            fillColor: '#EF4444',
+            fillColor: '#DC2626',
             fillOpacity: 1,
             strokeColor: '#FFFFFF',
             strokeWeight: 2
           }
         });
 
-        const strokeColor = riskScore > 65 ? '#EF4444' : riskScore > 40 ? '#F59E0B' : '#F97316';
+        const strokeColor =
+          riskScore > 65 ? '#DC2626' : riskScore > 40 ? '#D7A84A' : '#2E5A36';
 
         pathwayPolylineRef.current = new googleMaps.maps.Polyline({
           path: pathwayCoords,
           geodesic: true,
           strokeColor,
-          strokeOpacity: 0.95,
+          strokeOpacity: 0.92,
           strokeWeight: 4,
           map
         });
@@ -137,79 +138,82 @@ export const MapView: React.FC<MapViewProps> = ({ trek, riskScore }) => {
   };
 
   return (
-    <div className="bg-[#0F1420] border border-white/10 flex flex-col h-full min-h-[400px]">
-      {/* Top Map Header */}
-      <div className="px-4 py-3 bg-[#141B2B] border-b border-white/10 flex items-center justify-between gap-3">
+    <div className="bg-white border border-[#E4E0D2] rounded-2xl overflow-hidden flex flex-col h-full min-h-[400px] shadow-xs">
+      {/* Header */}
+      <div className="px-4 py-3 bg-[#FAF8F3] border-b border-[#E4E0D2] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-orange-500"></span>
-          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-white">
-            TOPOGRAPHIC ORBITAL RECONNAISSANCE
+          <MapPin className="w-4 h-4 text-[#243B2A]" />
+          <span className="text-xs font-bold uppercase tracking-wider text-[#243B2A]">
+            Trail Topography & Route Map
           </span>
         </div>
 
-        {/* Layer Selectors */}
-        <div className="flex items-center gap-1 bg-black/40 p-0.5 border border-white/10 text-[9px] font-mono">
+        <div className="flex items-center gap-1 bg-[#EAE6D8] p-0.5 rounded-lg text-[11px] font-semibold">
           <button
             type="button"
             onClick={() => switchMapType('terrain')}
-            className={`px-2.5 py-1 cursor-pointer transition-colors ${
+            className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${
               mapType === 'terrain'
-                ? 'bg-orange-500 text-black font-bold'
-                : 'text-white/60 hover:text-white'
+                ? 'bg-[#243B2A] text-white shadow-xs'
+                : 'text-[#526B4F] hover:text-[#243B2A]'
             }`}
           >
-            TERRAIN
+            Terrain
           </button>
           <button
             type="button"
             onClick={() => switchMapType('satellite')}
-            className={`px-2.5 py-1 cursor-pointer transition-colors ${
+            className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${
               mapType === 'satellite'
-                ? 'bg-orange-500 text-black font-bold'
-                : 'text-white/60 hover:text-white'
+                ? 'bg-[#243B2A] text-white shadow-xs'
+                : 'text-[#526B4F] hover:text-[#243B2A]'
             }`}
           >
-            SATELLITE
+            Satellite
           </button>
           <button
             type="button"
             onClick={() => switchMapType('roadmap')}
-            className={`px-2.5 py-1 cursor-pointer transition-colors ${
+            className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${
               mapType === 'roadmap'
-                ? 'bg-orange-500 text-black font-bold'
-                : 'text-white/60 hover:text-white'
+                ? 'bg-[#243B2A] text-white shadow-xs'
+                : 'text-[#526B4F] hover:text-[#243B2A]'
             }`}
           >
-            HYBRID
+            Road
           </button>
         </div>
       </div>
 
       {/* Map View Canvas */}
-      <div className="relative flex-1 w-full bg-[#080B12]">
+      <div className="relative flex-1 w-full bg-[#EAE6D8]">
         <div ref={mapContainerRef} className="w-full h-full min-h-[360px]" />
 
         {loadError && (
-          <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-6 text-center text-white space-y-2">
-            <Mountain className="w-10 h-10 text-orange-400 mb-1" />
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-orange-400">
-              VECTOR SATELLITE FEED STANDBY
+          <div className="absolute inset-0 bg-[#FAF8F3]/95 flex flex-col items-center justify-center p-6 text-center space-y-2">
+            <div className="w-12 h-12 rounded-2xl bg-[#243B2A] text-[#D7A84A] flex items-center justify-center mb-1">
+              <Mountain className="w-6 h-6" />
+            </div>
+            <span className="text-sm font-bold text-[#243B2A]">
+              Map Preview Unavailable
             </span>
-            <p className="text-xs text-white/50 max-w-sm font-mono">
-              Coordinates: {trek.latitude.toFixed(4)}° N, {trek.longitude.toFixed(4)}° E. Check Google Maps API Key in configuration.
+            <p className="text-xs text-[#526B4F] max-w-sm">
+              Coordinates: {trek.latitude.toFixed(4)}° N, {trek.longitude.toFixed(4)}° E. Check your Google Maps API key in Settings.
             </p>
           </div>
         )}
 
-        {/* Trailway Coordinates Bar */}
-        <div className="absolute bottom-3 left-3 right-3 bg-[#0E131E]/90 border border-white/10 p-2.5 flex items-center justify-between text-[10px] font-mono text-white/80">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500"></span>
-            <span>TRAILHEAD: {trek.startPoint?.name || 'Base Camp'}</span>
+        {/* Trailhead & Summit Overlay */}
+        <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-xs border border-[#E4E0D2] rounded-xl px-3.5 py-2 flex flex-wrap items-center justify-between gap-2 text-xs shadow-sm">
+          <div className="flex items-center gap-2 text-[#1F2520]">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0" />
+            <span className="font-medium">Start: {trek.startPoint?.name || 'Base Trailhead'}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-rose-500"></span>
-            <span>SUMMIT: {trek.endPoint?.name || trek.name} ({trek.elevation}m)</span>
+          <div className="flex items-center gap-2 text-[#1F2520]">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-600 shrink-0" />
+            <span className="font-medium">
+              Summit: {trek.endPoint?.name || trek.name} ({trek.elevation || 1200}m)
+            </span>
           </div>
         </div>
       </div>

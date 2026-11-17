@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar as CalendarIcon, ChevronRight } from 'lucide-react';
+import { Calendar as CalendarIcon } from 'lucide-react';
 
 interface DatePickerProps {
   selectedDate: string; // YYYY-MM-DD
@@ -30,9 +30,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     const day = String(d.getDate()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}`;
 
-    const dayName = i === 0 ? 'TODAY' : i === 1 ? 'TMRW' : d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+    const dayName =
+      i === 0
+        ? 'Today'
+        : i === 1
+        ? 'Tmrw'
+        : d.toLocaleDateString('en-US', { weekday: 'short' });
     const dayNum = String(d.getDate()).padStart(2, '0');
-    const monthName = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+    const monthName = d.toLocaleDateString('en-US', { month: 'short' });
 
     availableDays.push({
       dateStr,
@@ -44,17 +49,16 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   }
 
   return (
-    <div className="w-full space-y-1.5">
+    <div className="w-full space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-[10px] font-mono uppercase tracking-widest text-white/50 flex items-center gap-1.5">
-          <CalendarIcon className="w-3 h-3 text-orange-400" />
-          EXPEDITION TIME-WINDOW
+        <label className="text-xs font-semibold text-[#243B2A] flex items-center gap-1.5">
+          <CalendarIcon className="w-3.5 h-3.5 text-[#526B4F]" />
+          Trek Date
         </label>
-        <span className="text-[9px] font-mono text-white/40">10-DAY SYNOPTIC OUTLOOK</span>
+        <span className="text-[11px] text-[#6B7262]">10-day forecast</span>
       </div>
 
-      {/* Horizontal Strip */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
         {availableDays.map((item) => {
           const isSelected = selectedDate === item.dateStr;
 
@@ -64,19 +68,25 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               type="button"
               disabled={disabled}
               onClick={() => onSelectDate(item.dateStr)}
-              className={`flex-1 min-w-[65px] sm:min-w-[70px] py-2 px-1 text-center transition-all cursor-pointer select-none border ${
+              className={`flex-1 min-w-[60px] py-2 px-1.5 rounded-xl text-center transition-all cursor-pointer select-none border ${
                 isSelected
-                  ? 'bg-orange-500 text-black border-orange-500 font-bold'
-                  : 'bg-[#141B2B] border-white/5 hover:border-white/20 text-white/70 hover:text-white'
+                  ? 'bg-[#243B2A] text-white border-[#243B2A] shadow-xs'
+                  : 'bg-[#FAF8F3] border-[#E4E0D2] hover:border-[#526B4F] text-[#1F2520]'
               }`}
             >
-              <div className="text-[8px] font-mono tracking-widest">
+              <div
+                className={`text-[10px] font-medium ${
+                  isSelected ? 'text-[#D7A84A]' : 'text-[#6B7262]'
+                }`}
+              >
                 {item.dayName}
               </div>
-              <div className="text-sm font-mono font-black my-0.5">
-                {item.dayNum}
-              </div>
-              <div className="text-[8px] font-mono opacity-60">
+              <div className="text-sm font-bold tabular-nums my-0.5">{item.dayNum}</div>
+              <div
+                className={`text-[10px] ${
+                  isSelected ? 'text-white/80' : 'text-[#8C8675]'
+                }`}
+              >
                 {item.monthName}
               </div>
             </button>

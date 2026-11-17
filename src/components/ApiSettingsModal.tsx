@@ -30,22 +30,23 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-sm">
-      <div className="bg-[#0F1420] border border-white/10 w-full max-w-md flex flex-col shadow-2xl overflow-hidden animate-in fade-in duration-150">
-        
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/50 backdrop-blur-xs">
+      <div className="bg-white border border-[#E4E0D2] rounded-2xl w-full max-w-md flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-white/10 bg-[#141B2B] flex items-center justify-between">
-          <div>
-            <span className="font-mono text-[9px] tracking-widest uppercase text-orange-400 font-bold block">
-              SATELLITE TELEMETRY CONFIG
-            </span>
-            <h2 className="font-display text-base font-bold text-white tracking-tight mt-0.5">
-              Google Maps API Key
-            </h2>
+        <div className="px-6 py-4 border-b border-[#E4E0D2] bg-[#FAF8F3] flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#243B2A] text-[#D7A84A] flex items-center justify-center">
+              <Key className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-[#243B2A]">Google Maps API Key</h2>
+              <p className="text-xs text-[#526B4F]">Configure map & place lookup key</p>
+            </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="w-8 h-8 hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-lg hover:bg-[#EAE6D8] text-[#526B4F] flex items-center justify-center transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -54,25 +55,25 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
         {/* Content */}
         <form onSubmit={handleSave} className="p-6 space-y-4">
           {savedNotice && (
-            <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Key saved! Map viewport reloading...</span>
+            <div className="p-3 rounded-xl bg-[#EBF3EC] border border-[#C5DEC9] text-[#2E5A36] text-xs flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 shrink-0" />
+              <span>API key saved! Reloading map view...</span>
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-mono uppercase tracking-widest text-white/60">
-              API CREDENTIAL STRING
+            <label className="block text-xs font-semibold text-[#243B2A]">
+              Maps JavaScript API Key
             </label>
             <input
               type="text"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="AIzaSy..."
-              className="w-full px-3 py-2 bg-[#090D15] border border-white/10 focus:border-orange-500 text-xs font-mono text-white outline-hidden"
+              className="w-full px-3 py-2 bg-[#FAF8F3] border border-[#D5D0C0] focus:border-[#243B2A] rounded-xl text-sm font-mono text-[#1F2520] outline-hidden"
             />
-            <p className="text-[10px] font-mono text-white/40">
-              A public demonstration key is loaded by default. Input your GCP key for production quotas.
+            <p className="text-xs text-[#6B7262]">
+              A default key is pre-configured for demonstration. Enter your own key if needed.
             </p>
           </div>
 
@@ -80,19 +81,18 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-white/10 text-white/60 hover:text-white text-xs font-mono cursor-pointer"
+              className="px-4 py-2 border border-[#D5D0C0] bg-white hover:bg-[#EAE6D8] text-[#526B4F] rounded-xl text-xs font-semibold cursor-pointer"
             >
-              DISCARD
+              Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-orange-500 hover:bg-orange-400 text-black font-mono font-bold text-xs uppercase cursor-pointer transition-colors"
+              className="px-5 py-2 bg-[#243B2A] hover:bg-[#1A2C1F] text-white rounded-xl text-xs font-semibold cursor-pointer transition-colors"
             >
-              COMMIT KEY
+              Save Key
             </button>
           </div>
         </form>
-
       </div>
     </div>
   );
